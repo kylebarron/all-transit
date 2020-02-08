@@ -5,12 +5,10 @@ import geojson
 import requests
 from shapely.geometry import shape, box
 
-self = Transit()
-
 # Bbox around lower 48
-bbox = [-127.1, 24.1, -66.3, 49.7]
-bbox = [-124.4826,45.9742,-119.3763,48.3192]
-geometry = box(*bbox)
+# bbox = [-127.1, 24.1, -66.3, 49.7]
+# bbox = [-124.4826, 45.9742, -119.3763, 48.3192]
+# geometry = box(*bbox)
 
 
 class Transit():
@@ -168,8 +166,36 @@ class Transit():
 
         return stops
 
+    def _get_operators_intersecting_geometry(self, geometry):
+        """Find transit operators with service area crossing provided geometry
 
-def operators_in_bbox(bbox):
+        Using the transit.land API, you can find all transit operators within a
+        bounding box. Since the bbox of the PCT is quite large, I then check the
+        service area polygon of each potential transit operator to see if it
+        intersects the trail.
+
+        Args:
+            - geometry: Shapely geometry object of some type
+        """
+        # Create stringified bbox
+        bbox = ','.join(map(str, geometry.bounds))
+
+        url = 'https://transit.land/api/v1/operators'
+        params = {'bbox': bbox, 'per_page': 10000}
+        d = self.request_transit_land(url, params=params)
+
+        operators_intersecting_geom = []
+        for operator in d['operators']:
+            # Check if the service area of the operator intersects trail
+            operator_geom = shape(operator['geometry'])
+            intersects = geometry.intersects(operator_geom)
+            if intersects:
+                operators_intersecting_geom.append(operator)
+
+        return operators_intersecting_geom
+
+
+def operators_intersecting_geometry(geometry):
     """Find transit operators with service area in bbox
 
     Using the transit.land API, you can find all transit operators within a
@@ -181,7 +207,7 @@ def operators_in_bbox(bbox):
         - bbox: tuple of minx, miny, maxx, maxy
     """
     # Create stringified bbox
-    bbox = ','.join(map(str, bbox))
+    bbox = ','.join(map(str, geometry.bounds))
 
     url = 'https://transit.land/api/v1/operators'
     params = {'bbox': bbox, 'per_page': 1000}
