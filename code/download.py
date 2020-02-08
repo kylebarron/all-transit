@@ -15,8 +15,6 @@ geometry = box(*bbox)
 
 class Transit():
     """
-    TODO: update API calls to page if necessary. Currently the max results is
-    just set high.
     """
     def __init__(self):
         super(Transit, self).__init__()
