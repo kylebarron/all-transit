@@ -44,7 +44,6 @@ class Transit():
         operators[0].keys()
         Vis(geojson.Feature(geometry=operators[0]['geometry']))
 
-
         # Get all stops in geometry by all providers
         nearby_stops = self.get_stops_in_geometry(geometry)
 
@@ -111,34 +110,6 @@ class Transit():
 
         return all_stops
 
-    def _get_operators_intersecting_geometry(self, geometry):
-        """Find transit operators with service area crossing provided geometry
-
-        Using the transit.land API, you can find all transit operators within a
-        bounding box. Since the bbox of the PCT is quite large, I then check the
-        service area polygon of each potential transit operator to see if it
-        intersects the trail.
-
-        Args:
-            - geometry: Shapely geometry object of some type
-        """
-        # Create stringified bbox
-        bbox = ','.join(map(str, geometry.bounds))
-
-        url = 'https://transit.land/api/v1/operators'
-        params = {'bbox': bbox, 'per_page': 10}
-        d = request_transit_land(url, params=params)
-
-        operators_intersecting_geom = []
-        for operator in d['operators']:
-            # Check if the service area of the operator intersects trail
-            operator_geom = shape(operator['geometry'])
-            intersects = geometry.intersects(operator_geom)
-            if intersects:
-                operators_intersecting_geom.append(operator)
-
-        return operators_intersecting_geom
-
     def _get_stops_intersecting_geometry(self, geometry, operator_id):
         """Find all stops by operator that intersect geometry
 
@@ -199,6 +170,36 @@ class Transit():
 
         return stops
 
+
+def operators_in_bbox(bbox):
+    """Find transit operators with service area in bbox
+
+    Using the transit.land API, you can find all transit operators within a
+    bounding box. Since the bbox of the PCT is quite large, I then check the
+    service area polygon of each potential transit operator to see if it
+    intersects the trail.
+
+    Args:
+        - bbox: tuple of minx, miny, maxx, maxy
+    """
+    # Create stringified bbox
+    bbox = ','.join(map(str, bbox))
+
+    url = 'https://transit.land/api/v1/operators'
+    params = {'bbox': bbox, 'per_page': 1000}
+    d = request_transit_land(url, params=params)
+
+    operators_intersecting_geom = []
+    for operator in d['operators']:
+        # Check if the service area of the operator intersects trail
+        operator_geom = shape(operator['geometry'])
+        intersects = geometry.intersects(operator_geom)
+        if intersects:
+            operators_intersecting_geom.append(operator)
+
+    return operators_intersecting_geom
+
+
 def request_transit_land(url, params=None):
     """Wrapper to transit.land API to page over all results
 
@@ -239,6 +240,7 @@ def request_transit_land(url, params=None):
         params = None
 
     return all_results
+
 
 def _make_request(url, params=None):
     """Make request to transit.land API
