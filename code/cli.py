@@ -34,6 +34,8 @@ def operators(bbox, file):
     if file:
         # Read file into geodataframe
         gdf = gpd.read_file(file)
+        # Reproject to EPSG 4326
+        gdf = gdf.to_crs(epsg=4326)
         # Coalesce into single geometry
         geometry = gdf.unary_union
 
