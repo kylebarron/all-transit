@@ -30,7 +30,7 @@ def main():
 def operators(bbox, file):
     """Get transit operators within bbox or geometry
     """
-    if len(list(map(bool, [bbox, file]))) != 1:
+    if sum(list(map(bool, [bbox, file]))) != 1:
         raise ValueError('provide either bbox or file')
 
     if bbox:
