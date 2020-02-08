@@ -7,6 +7,11 @@ from shapely.geometry import box
 from download import operators_intersecting_geometry
 
 
+@click.group()
+def main():
+    pass
+
+
 @click.command()
 @click.option(
     '-b',
@@ -41,3 +46,9 @@ def operators(bbox, file):
 
     l = operators_intersecting_geometry(geometry)
     click.echo(json.dumps(l, separators=(',', ':')))
+
+
+main.add_command(operators)
+
+if __name__ == '__main__':
+    main()
