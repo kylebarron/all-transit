@@ -15,14 +15,20 @@ transitland operators --geometry data/gis/states/states.shp > data/operators.geo
 # All routes
 transitland routes --geometry data/gis/states/states.shp > data/routes.geojson
 
-# All stops
-transitland stops --geometry data/gis/states/states.shp > data/stops.geojson
+# All stop `onestop_id`s for those routes:
+cat data/routes.geojson | jq '.properties.stops_served_by_route[].stop_onestop_id' | uniq | tr -d \" > data/stop_onestop_ids.txt
+
+# All route stop patterns `onestop_id`s for those routes:
+cat data/routes.geojson | jq '.properties.route_stop_patterns_by_onestop_id[]' | uniq | tr -d \" > data/route_stop_patterns_by_onestop_id.txt
+
+# All stops served by routes
+transitland onestop-id --file data/stop_onestop_ids.txt > data/stops.json
 
 # All route-stop-patterns
-transitland route-stop-patterns --geometry data/gis/states/states.shp > data/route-stop-patterns.geojson
+transitland onestop-id --file data/route_stop_patterns_by_onestop_id.txt > data/route-stop-patterns.json
 
 # All schedule-stop-pairs
-transitland schedule-stop-pairs --geometry data/gis/states/states.shp > data/schedule-stop-pairs.json
+# transitland schedule-stop-pairs --geometry data/gis/states/states.shp > data/schedule-stop-pairs.json
 ```
 
 Make into vector tiles:
