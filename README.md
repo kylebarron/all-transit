@@ -16,7 +16,13 @@ transitland operators --geometry data/gis/states/states.shp > data/operators.geo
 transitland routes --geometry data/gis/states/states.shp > data/routes.geojson
 
 # All stops
-transitland stops --geometry data/gis/states/states.shp > data/routes.geojson
+transitland stops --geometry data/gis/states/states.shp > data/stops.geojson
+
+# All route-stop-patterns
+transitland route-stop-patterns --geometry data/gis/states/states.shp > data/route-stop-patterns.geojson
+
+# All schedule-stop-pairs
+transitland schedule-stop-pairs --geometry data/gis/states/states.shp > data/schedule-stop-pairs.json
 ```
 
 Make into vector tiles:
