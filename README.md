@@ -27,8 +27,17 @@ transitland onestop-id --file data/stop_onestop_ids.txt > data/stops.json
 # All route-stop-patterns
 transitland onestop-id --file data/route_stop_patterns_by_onestop_id.txt > data/route-stop-patterns.json
 
+# All operator `onestop_id`s
+cat data/operators.geojson | jq '.properties.onestop_id' | uniq |  tr -d \" > data/operator_onestop_ids.txt
+
 # All schedule-stop-pairs
-# transitland schedule-stop-pairs --geometry data/gis/states/states.shp > data/schedule-stop-pairs.json
+rm data/schedule-stop-pairs.json
+cat data/operator_onestop_ids.txt | while read operator_id
+do
+    transitland schedule-stop-pairs \
+        --operator-onestop-id $operator_id >> data/schedule-stop-pairs.json
+done
+
 ```
 
 Make into vector tiles:
