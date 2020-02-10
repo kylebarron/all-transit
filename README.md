@@ -43,7 +43,7 @@ rm data/schedule-stop-pairs.json
 cat data/operator_onestop_ids.txt | while read operator_id
 do
     transitland schedule-stop-pairs \
-        --operator-onestop-id $operator_id --active >> data/schedule-stop-pairs.json
+        --operator-onestop-id $operator_id --per-page 1000 --active >> data/schedule-stop-pairs.json
 done
 ```
 
