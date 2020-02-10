@@ -1,0 +1,19 @@
+{
+  "name": "all-transit",
+  "version": "0.1.0",
+  "description": "All transit in the continental US, as reported by <https://transit.land>. Like [_All Streets_](https://benfry.com/allstreets/map5.html), but for transit.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"no test specified\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kylebarron/all-transit.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kylebarron/all-transit/issues"
+  },
+  "homepage": "https://github.com/kylebarron/all-transit#readme"
+}
