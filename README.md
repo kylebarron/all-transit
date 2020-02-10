@@ -46,7 +46,6 @@ done
 
 ### Put into vector tiles
 
-
 ```bash
 # Writes mbtiles to data/routes.mbtiles
 bash code/tippecanoe/routes.sh data/routes.geojson
@@ -55,5 +54,6 @@ bash code/tippecanoe/routes.sh data/routes.geojson
 bash code/tippecanoe/operators.sh data/operators.geojson
 
 # Writes mbtiles to data/stops.mbtiles
-bash code/tippecanoe/stops.sh data/stops.geojson
+# The -c is important so that each feature gets output onto a single line
+cat data/stops.geojson | jq -c -f code/jq/stops.jq | bash code/tippecanoe/stops.sh
 ```
