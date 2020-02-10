@@ -1,0 +1,15 @@
+language: node_js
+before_script:
+  - npm install -g gatsby-cli
+node_js:
+  - "10"
+branches:
+  except:
+    # Built Gatsby source
+    - gh_pages
+deploy:
+  provider: script
+  script: cd site && yarn install && yarn run deploy
+  skip_cleanup: true
+  on:
+    branch: master

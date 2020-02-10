@@ -7,6 +7,7 @@
   "scripts": {
     "start": "gatsby develop",
     "develop": "gatsby develop",
+    "deploy": "gatsby build --prefix-paths && gh-pages -d public -b gh-pages -r https://$GH_TOKEN@github.com/kylebarron/all-transit.git",
     "build": "gatsby build",
     "lint": "npm run lint:ts && npm run lint:md && npm run lint:js && npm run lint:css",
     "lint:ts": "tslint \"./src/**/*.ts\" \"./src/**/*.tsx\"",
@@ -91,6 +92,7 @@
     "eslint-plugin-react": "^7.13.0",
     "eslint-plugin-react-hooks": "^1.6.0",
     "flat": "^4.1.0",
+    "gh-pages": "^2.2.0",
     "husky": "2.3.0",
     "jest": "^24.8.0",
     "lint-staged": "8.1.7",
