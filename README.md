@@ -58,3 +58,12 @@ bash code/tippecanoe/operators.sh data/operators.geojson
 # The -c is important so that each feature gets output onto a single line
 cat data/stops.geojson | jq -c -f code/jq/stops.jq | bash code/tippecanoe/stops.sh
 ```
+
+Combine into single mbtiles
+```bash
+tile-join \
+    -o data/all.mbtiles \
+    --no-tile-size-limit \
+    --force \
+    stops.mbtiles operators.mbtiles routes.mbtiles
+```
