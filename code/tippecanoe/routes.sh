@@ -20,7 +20,7 @@ tippecanoe \
     `# Set minimum zoom to 0` \
     --minimum-zoom=0 \
     `# Apply feature filter from file` \
-    -J feature_filter.json \
+    -J code/tippecanoe/routes_filter.json \
     `# Set maximum tile size to 600KB` \
     --maximum-tile-bytes=614400 \
     `# For zoom levels < max_zoom, don't include stops info to save space` \

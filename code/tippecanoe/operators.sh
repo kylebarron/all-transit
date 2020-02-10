@@ -15,6 +15,8 @@ tippecanoe \
     --layer='operators' \
     `# Read input in parallel` \
     -P \
+    `# Apply feature filter from file` \
+    -J code/tippecanoe/operators_filter.json \
     `# Include only the following attributes:` \
     --include='onestop_id' \
     --include='name' \
