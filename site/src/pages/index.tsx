@@ -18,14 +18,14 @@ const IndexPage = (props: LayoutProps) => (
     <Map location={props.location} />
 
     {/* Master head */}
-    <Segment vertical inverted textAlign="center" className="masthead">
+    {/* <Segment vertical inverted textAlign="center" className="masthead">
       <HeaderMenu
         Link={Link}
         pathname={props.location.pathname}
         items={menuItems}
         inverted
       />
-    </Segment>
+    </Segment> */}
   </div>
 );
 
