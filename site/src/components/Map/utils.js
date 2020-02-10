@@ -1,3 +1,5 @@
+import { navigate } from "gatsby";
+
 // Default initial viewport settings
 // These are overwritten by the URL hash if it exists
 const initialViewState = {
