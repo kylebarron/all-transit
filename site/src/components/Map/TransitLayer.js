@@ -25,8 +25,19 @@ export function TransitLayer(props) {
         type="line"
         paint={{
           "line-color": "#000",
-          "line-width": 0.7,
-          "line-gap-width": 1
+          "line-width": {
+            stops: [
+              [5, 0.3],
+              [15, 0.7]
+            ]
+          },
+          "line-gap-width": 1,
+          "line-opacity": {
+            stops: [
+              [4, 0.3],
+              [15, 0.7]
+            ]
+          }
         }}
       />
       <Layer
@@ -42,16 +53,17 @@ export function TransitLayer(props) {
           ],
           "line-width": {
             stops: [
-              [8, 1],
+              [5, 0.7],
               [15, 1.5]
             ]
           },
-          "line-opacity": [
-            "case",
-            ["has", "color"],
-            0.7,
-            0.8
-          ]
+          "line-opacity": {
+            stops: [
+              [4, 0.3],
+              [15, 0.7]
+            ]
+          }
+          // "line-opacity": ["case", ["has", "color"], 0.7, 0.8]
         }}
       />
       <Layer
