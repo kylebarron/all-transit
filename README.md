@@ -24,9 +24,6 @@ cat data/routes.geojson | jq '.properties.stops_served_by_route[].stop_onestop_i
 # All route stop patterns `onestop_id`s for those routes:
 cat data/routes.geojson | jq '.properties.route_stop_patterns_by_onestop_id[]' | uniq | tr -d \" > data/route_stop_patterns_by_onestop_id.txt
 
-# All stops info (slow)
-transitland onestop-id --file data/stop_onestop_ids.txt > data/stops.json
-
 # All stops (hopefully faster)
 rm data/stops.geojson
 cat data/operator_onestop_ids.txt | while read operator_id
@@ -39,11 +36,11 @@ done
 transitland onestop-id --file data/route_stop_patterns_by_onestop_id.txt > data/route-stop-patterns.json
 
 # All schedule-stop-pairs
-rm data/schedule-stop-pairs.json
+mkdir -p data/ssp/
 cat data/operator_onestop_ids.txt | while read operator_id
 do
     transitland schedule-stop-pairs \
-        --operator-onestop-id $operator_id --per-page 1000 --active >> data/schedule-stop-pairs.json
+        --operator-onestop-id $operator_id --per-page 1000 --active > data/ssp/$operator_id.json
 done
 ```
 
