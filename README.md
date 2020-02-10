@@ -40,7 +40,7 @@ mkdir -p data/ssp/
 cat data/operator_onestop_ids.txt | while read operator_id
 do
     transitland schedule-stop-pairs \
-        --operator-onestop-id $operator_id --per-page 1000 --active > data/ssp/$operator_id.json
+        --operator-onestop-id $operator_id --per-page 1000 --active | gzip > data/ssp/$operator_id.json.gz
 done
 ```
 
