@@ -48,7 +48,8 @@ done
 
 ```bash
 # Writes mbtiles to data/routes.mbtiles
-bash code/tippecanoe/routes.sh data/routes.geojson
+# The -c is important so that each feature gets output onto a single line
+cat data/routes.geojson | jq -c -f code/jq/routes.jq | bash code/tippecanoe/routes.sh
 
 # Writes mbtiles to data/operators.mbtiles
 bash code/tippecanoe/operators.sh data/operators.geojson

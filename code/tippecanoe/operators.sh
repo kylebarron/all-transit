@@ -21,7 +21,7 @@ tippecanoe \
     --include='short_name' \
     --include='website' \
     `# Set maximum zoom to 10` \
-    --maximum-zoom=10 \
+    --maximum-zoom=11 \
     `# Set minimum zoom to 0` \
     --minimum-zoom=0 \
     `# overwrite` \

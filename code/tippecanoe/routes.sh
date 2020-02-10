@@ -15,17 +15,16 @@ tippecanoe \
     --layer='routes' \
     `# Read input in parallel` \
     -P \
-    `# Include only the following attributes:` \
-    --include='onestop_id' \
-    --include='color' \
-    --include='vehicle_type' \
-    --include='name' \
-    `# Apply feature filter from file` \
-    -J feature_filter.json \
     `# Set maximum zoom to 10` \
-    --maximum-zoom=10 \
+    --maximum-zoom=11 \
     `# Set minimum zoom to 0` \
     --minimum-zoom=0 \
+    `# Apply feature filter from file` \
+    -J feature_filter.json \
+    `# Set maximum tile size to 600KB` \
+    --maximum-tile-bytes=614400 \
+    `# For zoom levels < max_zoom, don't include stops info to save space` \
+    -C 'if [[ $1 -lt 11 ]]; then jq -f code/jq/route_filter.jq; else cat; fi' \
     `# overwrite` \
     --force \
     `# Export path` \
