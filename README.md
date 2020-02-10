@@ -44,7 +44,9 @@ do
 done
 ```
 
-Make into vector tiles:
+### Put into vector tiles
+
+
 ```bash
 tippecanoe \
     `# tileset name` \
@@ -64,12 +66,64 @@ tippecanoe \
     --include='name' \
     `# Apply feature filter from file` \
     -J feature_filter.json \
-    `# Guess appropriate max zoom` \
-    -zg \
+    `# Set maximum zoom to 10` \
+    --maximum-zoom=10 \
+    `# Set minimum zoom to 0` \
+    --minimum-zoom=0 \
     `# overwrite` \
     --force \
     `# Export path` \
     -o data/routes.mbtiles \
     `# Input geojson` \
     data/routes.geojson
+tippecanoe \
+    `# tileset name` \
+    -n 'Transit operators' \
+    `# attribution` \
+    --attribution '<a href="https://transit.land/" target="_blank">© Transitland</a>' \
+    `# Description` \
+    --description 'Transit operator regions from Transitland API' \
+    `# Define layer name: routes` \
+    --layer='operators' \
+    `# Read input in parallel` \
+    -P \
+    `# Include only the following attributes:` \
+    --include='onestop_id' \
+    --include='name' \
+    --include='short_name' \
+    --include='website' \
+    `# Set maximum zoom to 10` \
+    --maximum-zoom=10 \
+    `# Set minimum zoom to 0` \
+    --minimum-zoom=0 \
+    `# overwrite` \
+    --force \
+    `# Export path` \
+    -o data/operators.mbtiles \
+    `# Input geojson` \
+    data/operators.geojson
+tippecanoe \
+    `# tileset name` \
+    -n 'Transit stops' \
+    `# attribution` \
+    --attribution '<a href="https://transit.land/" target="_blank">© Transitland</a>' \
+    `# Description` \
+    --description 'Transit stops from Transitland API' \
+    `# Define layer name: routes` \
+    --layer='stops' \
+    `# Read input in parallel` \
+    -P \
+    `# Include only the following attributes:` \
+    --include='operators_serving_stop' \
+    --include='routes_serving_stop' \
+    `# Set maximum zoom to 10` \
+    --maximum-zoom=10 \
+    `# Set minimum zoom to 0` \
+    --minimum-zoom=0 \
+    `# overwrite` \
+    --force \
+    `# Export path` \
+    -o data/stops.mbtiles \
+    `# Input geojson` \
+    data/stops.geojson
 ```
