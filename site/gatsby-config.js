@@ -1,12 +1,16 @@
 /* eslint-disable quotes */
 module.exports = {
+
+  // Necessary for a site published to the non-root path,
+  // i.e. kylebarron.github.io/all-transit
+  pathPrefix: "/all-transit",
+
   siteMetadata: {
-    title: `My website`,
-    googleVerification: `abcdefz`,
-    disqus: `gatsby-typescript`
+    title: `All Transit`,
+    googleVerification: `abcdefz`
   },
   mapping: {
-    'MarkdownRemark.frontmatter.author': `AuthorJson`
+    "MarkdownRemark.frontmatter.author": `AuthorJson`
   },
   plugins: [
     // Expose `/data` to graphQL layer
@@ -21,7 +25,7 @@ module.exports = {
     {
       resolve: `gatsby-plugin-google-analytics`,
       options: {
-        trackingId: 'YOUR_GOOGLE_ANALYTICS_TRACKING_ID',
+        trackingId: "YOUR_GOOGLE_ANALYTICS_TRACKING_ID",
         // Puts tracking script in the head instead of the body
         head: false,
         // Setting this parameter is optional
@@ -58,7 +62,7 @@ module.exports = {
     `gatsby-transformer-json`,
 
     // Add typescript stack into webpack
-    `gatsby-plugin-typescript`,
+    `gatsby-plugin-typescript`
 
     // This plugin takes your configuration and generates a
     // web manifest file so your website can be added to your
