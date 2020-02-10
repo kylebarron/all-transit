@@ -101,7 +101,7 @@ export function TransitLayer(props) {
               [14, 10]
             ]
           },
-          "symbol-spacing": 400,
+          "symbol-spacing": 350,
           "text-max-angle": 50,
           "text-letter-spacing": 0,
           "text-max-width": 15
