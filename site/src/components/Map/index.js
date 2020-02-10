@@ -9,6 +9,7 @@ import { getInitialViewState } from "./utils";
 // import {
 //   interactiveLayerIds
 // } from "./MapboxLayer";
+import {TransitLayer} from "./TransitLayer"
 
 // You'll get obscure errors without including the Mapbox GL CSS
 import "../../css/mapbox-gl.css";
@@ -158,6 +159,7 @@ class Map extends React.Component {
             mapStyle="https://raw.githubusercontent.com/kylebarron/fiord-color-gl-style/master/style.json"
             mapOptions={{ hash: true }}
           >
+            <TransitLayer />
           </InteractiveMap>
 
           {/* NavigationControl needs to be _outside_ InteractiveMap */}
