@@ -17,6 +17,7 @@ const minHighlightZoom = 11;
 
 class Map extends React.Component {
   state = {
+    filterBoxExpanded: null,
     highlightStopsByRoute: false,
     highlightRoutesByStop: false,
     highlightedStopsOnestopIds: [],
@@ -169,14 +170,14 @@ class Map extends React.Component {
         >
           <Accordion as={Menu} vertical fluid styled style={{ maxWidth: 240 }}>
             <Accordion.Title
-              active={this.state.dataOverlaysExpanded}
+              active={this.state.filterBoxExpanded}
               index={0}
-              onClick={() => this._toggleState("dataOverlaysExpanded")}
+              onClick={() => this._toggleState("filterBoxExpanded")}
             >
               <Icon name="dropdown" />
               Filters
             </Accordion.Title>
-            <Accordion.Content active={this.state.dataOverlaysExpanded}>
+            <Accordion.Content active={this.state.filterBoxExpanded}>
               {zoom < 11 ? (
                 <p>Zoom in for more options</p>
               ) : (
