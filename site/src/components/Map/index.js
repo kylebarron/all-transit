@@ -42,7 +42,7 @@ class Map extends React.Component {
       });
     }
 
-    if (!highlightStopsByRoute || !highlightRoutesByStop) {
+    if (!highlightStopsByRoute && !highlightRoutesByStop) {
       return this.setState({
         highlightedStopsOnestopIds: [],
         highlightedRoutesOnestopIds: []
