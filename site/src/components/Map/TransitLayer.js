@@ -132,6 +132,7 @@ export function TransitLayer(props) {
       />
       <Layer
         id="transit_stops"
+        beforeId="highway_name_other"
         source-layer="stops"
         minzoom={11}
         type="circle"
