@@ -28,6 +28,7 @@ export function TransitLayer(props) {
     >
       <Layer
         id="transit_routes_casing_default"
+        beforeId="highway_name_other"
         source-layer="routes"
         type="line"
         paint={{
@@ -52,6 +53,7 @@ export function TransitLayer(props) {
       />
       <Layer
         id="transit_routes_casing_highlighting"
+        beforeId="highway_name_other"
         source-layer="routes"
         type="line"
         paint={{
@@ -76,6 +78,7 @@ export function TransitLayer(props) {
       />
       <Layer
         id="transit_routes_default"
+        beforeId="highway_name_other"
         source-layer="routes"
         type="line"
         paint={{
@@ -104,6 +107,7 @@ export function TransitLayer(props) {
       />
       <Layer
         id="transit_routes_highlighting"
+        beforeId="highway_name_other"
         source-layer="routes"
         type="line"
         paint={{
