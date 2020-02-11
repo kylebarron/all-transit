@@ -16,15 +16,13 @@ const pickingRadius = 5;
 
 class Map extends React.Component {
   state = {
-    showTooltip: true,
     pickedObject: null,
     pickedLayer: null,
-    pointerX: null,
-    pointerY: null,
     highlightStopsByRoute: false,
     highlightRoutesByStop: true,
     highlightedStopsOnestopIds: [],
-    highlightedRoutesOnestopIds: []
+    highlightedRoutesOnestopIds: [],
+    zoom: null
   };
 
   // Called on click by deck.gl
@@ -40,9 +38,14 @@ class Map extends React.Component {
     if (object && layer) {
       return this.setState({
         pickedObject: object,
-        pickedLayer: layer,
-        pointerX: x,
-        pointerY: y
+        pickedLayer: layer
+      });
+    }
+
+    if (!highlightStopsByRoute || !highlightRoutesByStop) {
+      return this.setState({
+        highlightedStopsOnestopIds: [],
+        highlightedRoutesOnestopIds: []
       });
     }
 
@@ -51,7 +54,6 @@ class Map extends React.Component {
     // Make sure you create the ref on InteractiveMap or StaticMap
     // Without an options parameter, checks all layers rendered by React Map GL
     if (!this.map) return;
-
     const features = this.map.queryRenderedFeatures(
       [
         [x - pickingRadius, y - pickingRadius],
@@ -100,16 +102,17 @@ class Map extends React.Component {
     }));
   };
 
-  _toggleMapOptionsExpanded = value => {
-    // If currently expanded, close it; else open this section
-    this.setState(prevState => ({
-      dataOverlaysExpandedSection:
-        prevState.dataOverlaysExpandedSection === value ? null : value
-    }));
-  };
+  onViewStateChange = ({viewState}) => {
+    this.setState({zoom: viewState.zoom})
+  }
 
   render() {
     const { location } = this.props;
+    const {
+      highlightedStopsOnestopIds,
+      highlightedRoutesOnestopIds,
+      zoom
+    } = this.state;
 
     return (
       <div ref={ref => (this.deckDiv = ref)}>
@@ -118,8 +121,7 @@ class Map extends React.Component {
             this.deck = ref;
           }}
           controller={{
-            type: MapController,
-            touchRotate: true
+            type: MapController
           }}
           initialViewState={getInitialViewState(location)}
           // layers={layers}
@@ -127,6 +129,7 @@ class Map extends React.Component {
           onClick={this._updatePicked}
           onHover={this._updatePicked}
           pickingRadius={pickingRadius}
+          onViewStateChange={this.onViewStateChange}
         >
           <InteractiveMap
             ref={ref => {
@@ -135,7 +138,10 @@ class Map extends React.Component {
             mapStyle="https://raw.githubusercontent.com/kylebarron/fiord-color-gl-style/master/style.json"
             mapOptions={{ hash: true }}
           >
-            <TransitLayer />
+            <TransitLayer
+              highlightedRouteIds={highlightedRoutesOnestopIds}
+              highlightedStopIds={highlightedStopsOnestopIds}
+            />
           </InteractiveMap>
 
           {/* NavigationControl needs to be _outside_ InteractiveMap */}
@@ -167,37 +173,24 @@ class Map extends React.Component {
               Filters
             </Accordion.Title>
             <Accordion.Content active={this.state.dataOverlaysExpanded}>
-              <Checkbox
-                toggle
-                label="Highlight routes by stop"
-                onChange={() => this._toggleState("highlightRoutesByStop")}
-                checked={this.state.highlightRoutesByStop}
-              />
-              <Accordion as={Menu} vertical fluid styled>
-                <Menu.Item>
-                  <Accordion.Title
-                    active={this.state.dataOverlaysExpandedSection === "photos"}
-                    content="Photography"
-                    index={0}
-                    onClick={() => this._toggleMapOptionsExpanded("photos")}
+              {zoom < 11 ? (
+                <p>Zoom in for more options</p>
+              ) : (
+                <div>
+                  <Checkbox
+                    toggle
+                    label="Highlight routes by stop"
+                    onChange={() => this._toggleState("highlightRoutesByStop")}
+                    checked={this.state.highlightRoutesByStop}
                   />
-                  <Accordion.Content
-                    active={this.state.dataOverlaysExpandedSection === "photos"}
-                  >
-                    <Checkbox
-                      label="Enabled"
-                      onChange={() => this._toggleState("layerPhotosVisible")}
-                      checked={this.state.layerPhotosVisible}
-                      style={{ paddingBottom: 10 }}
-                    />
-                    <Checkbox
-                      label="Show all"
-                      onChange={() => this._toggleState("layerPhotosShowAll")}
-                      checked={this.state.layerPhotosShowAll}
-                    />
-                  </Accordion.Content>
-                </Menu.Item>
-              </Accordion>
+                  <Checkbox
+                    toggle
+                    label="Highlight stops by route"
+                    onChange={() => this._toggleState("highlightStopsByRoute")}
+                    checked={this.state.highlightStopsByRoute}
+                  />
+                </div>
+              )}
             </Accordion.Content>
           </Accordion>
         </Container>
