@@ -181,12 +181,12 @@ class Map extends React.Component {
                     onChange={() => this._toggleState("highlightRoutesByStop")}
                     checked={this.state.highlightRoutesByStop}
                   />
-                  <Checkbox
+                  {/* <Checkbox
                     toggle
                     label="Highlight stops by route"
                     onChange={() => this._toggleState("highlightStopsByRoute")}
                     checked={this.state.highlightStopsByRoute}
-                  />
+                  /> */}
                 </div>
               )}
             </Accordion.Content>
