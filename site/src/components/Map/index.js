@@ -17,8 +17,6 @@ const minHighlightZoom = 11;
 
 class Map extends React.Component {
   state = {
-    pickedObject: null,
-    pickedLayer: null,
     highlightStopsByRoute: false,
     highlightRoutesByStop: false,
     highlightedStopsOnestopIds: [],
@@ -35,7 +33,7 @@ class Map extends React.Component {
     const { highlightRoutesByStop, highlightStopsByRoute, zoom } = this.state;
 
     if (
-      (zoom < minHighlightZoom) ||
+      zoom < minHighlightZoom ||
       (!highlightStopsByRoute && !highlightRoutesByStop)
     ) {
       return this.setState({
@@ -101,7 +99,15 @@ class Map extends React.Component {
   };
 
   onViewStateChange = ({ viewState }) => {
-    this.setState({ zoom: viewState.zoom });
+    const { zoom } = viewState;
+    const newState = { zoom: zoom };
+
+    // Reset highlighted objects when zooming out past minHighlightZoom
+    if (zoom < minHighlightZoom) {
+      newState["highlightedStopsOnestopIds"] = [];
+      newState["highlightedRoutesOnestopIds"] = [];
+    }
+    this.setState(newState);
   };
 
   render() {
