@@ -20,12 +20,7 @@ export function TransitLayer(props) {
     <Source
       id="transit"
       type="vector"
-      minzoom={0}
-      maxzoom={11}
-      tiles={[
-        "https://mbtiles.nst.guide/services/all-transit/all/tiles/{z}/{x}/{y}.pbf"
-      ]}
-      attribution='<a href="https://transit.land/" target="_blank">© Transitland</a>'
+      url="https://mbtiles.nst.guide/services/all-transit/all"
     >
       <Layer
         id="transit_routes_casing_default"
