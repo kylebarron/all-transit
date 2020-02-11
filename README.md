@@ -1,5 +1,7 @@
 # All transit
 
+[![Build Status](https://travis-ci.org/kylebarron/all-transit.svg?branch=master)](https://travis-ci.org/kylebarron/all-transit)
+
 All transit in the continental US, as reported by <https://transit.land>. Like
 [_All Streets_](https://benfry.com/allstreets/map5.html), but for transit.
 
