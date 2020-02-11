@@ -6,7 +6,7 @@ import InteractiveMap, {
   NavigationControl
 } from "react-map-gl";
 import { getInitialViewState } from "./utils";
-import { Container, Accordion, Icon, Menu, Checkbox } from "semantic-ui-react";
+import { Container, Accordion, Icon, Menu, Checkbox, Grid } from "semantic-ui-react";
 import { TransitLayer, interactiveLayerIds } from "./TransitLayer";
 
 // You'll get obscure errors without including the Mapbox GL CSS
@@ -22,7 +22,13 @@ class Map extends React.Component {
     highlightRoutesByStop: false,
     highlightedStopsOnestopIds: [],
     highlightedRoutesOnestopIds: [],
-    zoom: null
+    zoom: null,
+    includeTram: true,
+    includeMetro: true,
+    includeRail: true,
+    includeBus: true,
+    includeFerry: true,
+    includeCablecar: true,
   };
 
   // Called on click by deck.gl
@@ -129,7 +135,6 @@ class Map extends React.Component {
             type: MapController
           }}
           initialViewState={getInitialViewState(location)}
-          // layers={layers}
           ContextProvider={MapContext.Provider}
           onClick={this._updatePicked}
           onHover={this._updatePicked}
@@ -146,6 +151,14 @@ class Map extends React.Component {
             <TransitLayer
               highlightedRouteIds={highlightedRoutesOnestopIds}
               highlightedStopIds={highlightedStopsOnestopIds}
+              transitModes={{
+                tram: this.state.includeTram,
+                metro: this.state.includeMetro,
+                rail: this.state.includeRail,
+                bus: this.state.includeBus,
+                ferry: this.state.includeFerry,
+                cablecar: this.state.includeCablecar,
+              }}
             />
           </InteractiveMap>
 
@@ -196,6 +209,27 @@ class Map extends React.Component {
                   /> */}
                 </div>
               )}
+              <Grid columns={1} relaxed>
+                <Grid.Column>
+                  {[
+                    "Tram",
+                    "Metro",
+                    "Rail",
+                    "Bus",
+                    "Ferry",
+                    "Cablecar",
+                  ].map(mode => (
+                    <Grid.Row>
+                      <Checkbox
+                        toggle
+                        label={`${mode}`}
+                        onChange={() => this._toggleState(`include${mode}`)}
+                        checked={this.state[`include${mode}`]}
+                      />
+                    </Grid.Row>
+                  ))}
+                </Grid.Column>
+              </Grid>
             </Accordion.Content>
           </Accordion>
         </Container>

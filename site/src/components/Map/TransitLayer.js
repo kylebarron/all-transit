@@ -10,7 +10,15 @@ export const interactiveLayerIds = [
 ];
 
 export function TransitLayer(props) {
-  const { highlightedRouteIds, highlightedStopIds } = props;
+  const { highlightedRouteIds, highlightedStopIds, transitModes } = props;
+
+  // https://stackoverflow.com/a/25095796
+  const transitTypes = Object.keys(transitModes).filter(k => transitModes[k]);
+  const transitModeFilter = [
+    "in",
+    ["get", "vehicle_type"],
+    ["literal", transitTypes]
+  ];
 
   const useRouteHighlighting = !(
     !Array.isArray(highlightedRouteIds) || !highlightedRouteIds.length
@@ -27,6 +35,7 @@ export function TransitLayer(props) {
         beforeId="highway_name_other"
         source-layer="routes"
         type="line"
+        filter={transitModeFilter}
         paint={{
           "line-color": "#000",
           "line-width": {
@@ -52,6 +61,7 @@ export function TransitLayer(props) {
         beforeId="highway_name_other"
         source-layer="routes"
         type="line"
+        filter={transitModeFilter}
         paint={{
           "line-color": "#000",
           "line-width": {
@@ -77,6 +87,7 @@ export function TransitLayer(props) {
         beforeId="highway_name_other"
         source-layer="routes"
         type="line"
+        filter={transitModeFilter}
         paint={{
           "line-color": [
             "case",
@@ -106,6 +117,7 @@ export function TransitLayer(props) {
         beforeId="highway_name_other"
         source-layer="routes"
         type="line"
+        filter={transitModeFilter}
         paint={{
           "line-color": [
             "case",
@@ -163,7 +175,8 @@ export function TransitLayer(props) {
         filter={[
           "all",
           ["!=", ["get", "operated_by_name"], "Amtrak California"],
-          ["!=", ["get", "operated_by_name"], "Amtrak Chartered Vehicle"]
+          ["!=", ["get", "operated_by_name"], "Amtrak Chartered Vehicle"],
+          transitModeFilter
         ]}
         layout={{
           "symbol-placement": "line",
