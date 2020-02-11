@@ -2,8 +2,13 @@
 
 [![Build Status](https://travis-ci.org/kylebarron/all-transit.svg?branch=master)](https://travis-ci.org/kylebarron/all-transit)
 
-All transit in the continental US, as reported by <https://transit.land>.
-Inspired by [_All Streets_](https://benfry.com/allstreets/map5.html).
+[![Example Screenshot](assets/overview_screenshot.png)](https://kylebarron.dev/all-transit)
+
+[Website: https://kylebarron.dev/all-transit](https://kylebarron.dev/all-transit)
+
+All transit in the continental US, as reported by the [Transitland
+database](https://transit.land) Inspired by [_All
+Streets_](https://benfry.com/allstreets/map5.html).
 
 ```bash
 git clone https://github.com/kylebarron/all-transit
