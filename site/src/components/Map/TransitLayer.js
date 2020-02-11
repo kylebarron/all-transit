@@ -25,6 +25,7 @@ export function TransitLayer(props) {
       tiles={[
         "https://mbtiles.nst.guide/services/all-transit/all/tiles/{z}/{x}/{y}.pbf"
       ]}
+      attribution='<a href="https://transit.land/" target="_blank">© Transitland</a>'
     >
       <Layer
         id="transit_routes_casing_default"
