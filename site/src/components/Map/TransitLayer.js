@@ -6,6 +6,7 @@ import { Source, Layer } from "react-map-gl";
 export const interactiveLayerIds = [
   // React map gl layers:
   "transit_routes",
+  "transit_stops"
 ];
 
 export function TransitLayer(props) {
