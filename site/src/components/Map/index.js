@@ -150,7 +150,7 @@ class Map extends React.Component {
           </InteractiveMap>
 
           {/* NavigationControl needs to be _outside_ InteractiveMap */}
-          <div style={{ position: "absolute", right: 30, top: 110, zIndex: 1 }}>
+          <div style={{ position: "absolute", right: 30, top: 30, zIndex: 1 }}>
             <NavigationControl />
           </div>
         </DeckGL>
