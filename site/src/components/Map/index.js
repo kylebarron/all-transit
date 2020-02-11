@@ -13,7 +13,7 @@ import { TransitLayer, interactiveLayerIds } from "./TransitLayer";
 import "../../css/mapbox-gl.css";
 
 const pickingRadius = 10;
-const minHighlightZoom = 12;
+const minHighlightZoom = 11;
 
 class Map extends React.Component {
   state = {
