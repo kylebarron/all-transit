@@ -4,12 +4,18 @@ import { Source, Layer } from "react-map-gl";
 // List of Mapbox/React Map GL layer ids that are allowed to be picked
 // These will be picked if no deck.gl layer is above it.
 export const interactiveLayerIds = [
-  // React map gl layers:
-  "transit_routes",
+  "transit_routes_default",
+  "transit_routes_highlighting",
   "transit_stops"
 ];
 
 export function TransitLayer(props) {
+  const { highlightedRouteIds, highlightedStopIds } = props;
+
+  const useRouteHighlighting = !(
+    !Array.isArray(highlightedRouteIds) || !highlightedRouteIds.length
+  );
+
   return (
     <Source
       id="transit"
@@ -21,7 +27,7 @@ export function TransitLayer(props) {
       ]}
     >
       <Layer
-        id="transit_routes_casing"
+        id="transit_routes_casing_default"
         source-layer="routes"
         type="line"
         paint={{
@@ -36,13 +42,40 @@ export function TransitLayer(props) {
           "line-opacity": {
             stops: [
               [4, 0.3],
-              [15, 0.7]
+              [14, 0.7]
             ]
           }
         }}
+        layout={{
+          visibility: useRouteHighlighting ? "none" : "visible"
+        }}
       />
       <Layer
-        id="transit_routes"
+        id="transit_routes_casing_highlighting"
+        source-layer="routes"
+        type="line"
+        paint={{
+          "line-color": "#000",
+          "line-width": {
+            stops: [
+              [5, 0.3],
+              [15, 0.7]
+            ]
+          },
+          "line-gap-width": 1,
+          "line-opacity": [
+            "case",
+            ["in", ["get", "onestop_id"], ["literal", highlightedRouteIds]],
+            1,
+            0.05
+          ]
+        }}
+        layout={{
+          visibility: useRouteHighlighting ? "visible" : "none"
+        }}
+      />
+      <Layer
+        id="transit_routes_default"
         source-layer="routes"
         type="line"
         paint={{
@@ -61,10 +94,40 @@ export function TransitLayer(props) {
           "line-opacity": {
             stops: [
               [4, 0.3],
-              [15, 0.7]
+              [14, 0.7]
             ]
           }
-          // "line-opacity": ["case", ["has", "color"], 0.7, 0.8]
+        }}
+        layout={{
+          visibility: useRouteHighlighting ? "none" : "visible"
+        }}
+      />
+      <Layer
+        id="transit_routes_highlighting"
+        source-layer="routes"
+        type="line"
+        paint={{
+          "line-color": [
+            "case",
+            ["has", "color"],
+            ["concat", "#", ["downcase", ["get", "color"]]],
+            "hsl(229, 50%, 35%)"
+          ],
+          "line-width": {
+            stops: [
+              [5, 0.7],
+              [15, 1.5]
+            ]
+          },
+          "line-opacity": [
+            "case",
+            ["in", ["get", "onestop_id"], ["literal", highlightedRouteIds]],
+            1,
+            0.05
+          ]
+        }}
+        layout={{
+          visibility: useRouteHighlighting ? "visible" : "none"
         }}
       />
       <Layer
@@ -83,7 +146,7 @@ export function TransitLayer(props) {
           "circle-radius": {
             stops: [
               [11, 1],
-              [15, 5]
+              [15, 4]
             ]
           },
           "circle-color": "#cccccc",
@@ -129,4 +192,3 @@ export function TransitLayer(props) {
     </Source>
   );
 }
-

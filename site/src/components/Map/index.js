@@ -12,14 +12,15 @@ import { TransitLayer, interactiveLayerIds } from "./TransitLayer";
 // You'll get obscure errors without including the Mapbox GL CSS
 import "../../css/mapbox-gl.css";
 
-const pickingRadius = 5;
+const pickingRadius = 10;
+const minHighlightZoom = 12;
 
 class Map extends React.Component {
   state = {
     pickedObject: null,
     pickedLayer: null,
     highlightStopsByRoute: false,
-    highlightRoutesByStop: true,
+    highlightRoutesByStop: false,
     highlightedStopsOnestopIds: [],
     highlightedRoutesOnestopIds: [],
     zoom: null
@@ -30,19 +31,13 @@ class Map extends React.Component {
   // If the deck.gl picking engine finds something, the `object` , `color` and
   // `layer` attributes will be non-null
   _updatePicked = event => {
-    const { x, y, object, layer } = event;
-    const { highlightRoutesByStop, highlightStopsByRoute } = this.state;
+    const { x, y } = event;
+    const { highlightRoutesByStop, highlightStopsByRoute, zoom } = this.state;
 
-    // If object and layer both exist, then deck.gl found an object, and I
-    // won't query for the Mapbox layers underneath
-    if (object && layer) {
-      return this.setState({
-        pickedObject: object,
-        pickedLayer: layer
-      });
-    }
-
-    if (!highlightStopsByRoute && !highlightRoutesByStop) {
+    if (
+      (zoom < minHighlightZoom) ||
+      (!highlightStopsByRoute && !highlightRoutesByStop)
+    ) {
       return this.setState({
         highlightedStopsOnestopIds: [],
         highlightedRoutesOnestopIds: []
@@ -72,9 +67,12 @@ class Map extends React.Component {
     let highlightedStopIds = [];
     let highlightedRouteIds = [];
     for (const feature of features) {
-      console.log(feature);
-
-      if (highlightStopsByRoute && feature.layer.id === "transit_routes") {
+      if (
+        highlightStopsByRoute &&
+        ["transit_routes_default", "transit_routes_highlighting"].includes(
+          feature.layer.id
+        )
+      ) {
         if (feature.properties && feature.properties.stops_served_by_route) {
           highlightedStopIds = highlightedStopIds.concat(
             JSON.parse(feature.properties.stops_served_by_route)
@@ -102,9 +100,9 @@ class Map extends React.Component {
     }));
   };
 
-  onViewStateChange = ({viewState}) => {
-    this.setState({zoom: viewState.zoom})
-  }
+  onViewStateChange = ({ viewState }) => {
+    this.setState({ zoom: viewState.zoom });
+  };
 
   render() {
     const { location } = this.props;
