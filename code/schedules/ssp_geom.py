@@ -13,32 +13,37 @@ So I think the process to get geometric ScheduleStopPairs is:
 import json
 import re
 
+import click
 import geojson
 from shapely.geometry import LineString, Point, asShape
 from shapely.ops import nearest_points, substring
 
 
 def main():
-    pass
+    stops_path = '/Users/kyle/github/mapping/all-transit/data/stops.geojson'
+    routes_path = '/Users/kyle/github/mapping/all-transit/data/routes.geojson'
+    ssp_path = '/Users/kyle/github/mapping/all-transit/data/ssp/test.json'
+
+    ag = Add_Geometry(stops_path=stops_path, routes_path=routes_path)
+    ssp_iter = ag.match_ssp_to_route(ssp_path=ssp_path)
+    for feature in ssp_iter:
+        click.echo(geojson.dumps(feature, separators=(',', ':')))
 
 
 class Add_Geometry:
     """docstring for """
-    def __init__(self):
+    def __init__(self, stops_path, routes_path):
         super(Add_Geometry, self).__init__()
 
-        self.stops_path = '/Users/kyle/github/mapping/all-transit/data/stops.geojson'
-        self.routes_path = '/Users/kyle/github/mapping/all-transit/data/routes.geojson'
-        self.ssp_path = '/Users/kyle/github/mapping/all-transit/data/ssp/test.json'
+        self.stops = load_list_as_dict(path=stops_path, id_key='id')
+        self.routes = load_list_as_dict(path=routes_path, id_key='id')
 
-        self.stops = load_list_as_dict(path=self.stops_path, id_key='id')
-        self.routes = load_list_as_dict(path=self.routes_path, id_key='id')
-
-    def match_ssp_to_route(self):
+    def match_ssp_to_route(self, ssp_path):
         """Assign geometries with interpolated timestamps to ScheduleStopPairs
         """
-        ssp_iter = iter_file(self.ssp_path)
-        for line in ssp_iter:
+        # Iterate over lines in the ScheduleStopPairs file
+        for line in iter_file(ssp_path):
+            # Parse JSON as dict
             ssp = json.loads(line)
 
             orig_id = ssp['origin_onestop_id']
