@@ -99,10 +99,15 @@ tile-join \
 ## Schedules
 
 ```bash
+# Create jq filter string that keeps ScheduleStopPairs that are on Friday,
+# whose between origin_departure_time is >=4:00pm and <8:00pm, and that ran on
+# Feb 7, 2020
+jq_str="$(python code/schedules/construct_jq.py --day-of-week 4 --start-hour 16 --end-hour 20 --service-date '2020-02-07')"
+
 # Loop over operators
 cat data/operator_onestop_ids.txt | while read operator_id
 do
-    bash code/schedules/main.sh $operator_id
+    bash code/schedules/main.sh $operator_id "$jq_str"
 done
 ```
 
