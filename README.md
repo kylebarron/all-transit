@@ -127,7 +127,7 @@ Then cut these into tiles:
 ```bash
 mkdir -p data/ssp_geom_tiles
 for file in data/ssp_geom/*.geojson; do
-    python code/tile_geojson.py -z 11 -Z 11 --allowed-geom-type 'LineString' -d data/ssp_geom_tiles $file
+    python code/tile_geojson.py -z 12 -Z 12 --allowed-geom-type 'LineString' -d data/ssp_geom_tiles $file
 done
 ```
 
