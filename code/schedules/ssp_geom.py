@@ -12,6 +12,7 @@ So I think the process to get geometric ScheduleStopPairs is:
 """
 import json
 import re
+import sys
 
 import click
 import geojson
@@ -48,6 +49,9 @@ def main(stops_path, routes_path, properties_keys, ssp_jsonl):
 
         # Construct GeoJSON Feature of ScheduleStopPair
         ssp_feature = ag.match_ssp_to_route(ssp, properties_keys)
+
+        if ssp_feature is None:
+            continue
 
         # Write to stdout
         click.echo(geojson.dumps(ssp_feature, separators=(',', ':')))
@@ -102,10 +106,20 @@ class ScheduleStopPairGeometry:
             min_index = dists.index(min(dists))
             line_to_split = route_geom[min_index]
 
+        else:
+            print(f'route geometry has type {route_geom.type}', file=sys.stderr)
+            return None
+
         # Now that you have the shortest lineString, split it
         d1 = line_to_split.project(orig_route_point)
         d2 = line_to_split.project(dest_route_point)
         cut_line = substring(line_to_split, d1, d2)
+
+        # If cut_line is not a LineString, the linear referencing methods won't
+        # work
+        if cut_line.type != 'LineString':
+            print(f'cut line has type {route_geom.type}', file=sys.stderr)
+            return None
 
         # 6. For each coordinate of the `LineString` between `origin` and
         # `destination`, linearly interpolate the timestamp between the
