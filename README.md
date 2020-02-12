@@ -108,6 +108,25 @@ jq_str="$(python code/schedules/construct_jq.py --day-of-week 4 --start-hour 16 
 mkdir -p data/ssp_geom
 cat data/operator_onestop_ids.txt | while read operator_id
 do
+    # If the "finished" file exists, then skip this operator id
+    if [ -f data/ssp_geom/$operator_id.finished ]; then
+        continue
+    fi
+
+    if [ ! -f data/stops/$operator_id.geojson ]; then
+        echo "stops file does not exist for operator: $operator_id. Skipping."
+        # Declare that this operator id finished running
+        touch data/ssp_geom/$operator_id.finished
+        continue
+    fi
+
+    if [ ! -f data/routes/$operator_id.geojson ]; then
+        echo "routes file does not exist for operator: $operator_id. Skipping."
+        # Declare that this operator id finished running
+        touch data/ssp_geom/$operator_id.finished
+        continue
+    fi
+
     # Unzip json.gz file with ScheduleStopPairs and write to stdout
     gunzip -c data/ssp/$operator_id.json.gz \
     `# Use jq to quickly filter above constraints for day and time` \
@@ -120,6 +139,9 @@ do
         --routes-path data/routes/$operator_id.geojson \
         - \
         > data/ssp_geom/$operator_id.geojson
+
+    # Declare that this operator id finished running
+    touch data/ssp_geom/$operator_id.finished
 done
 ```
 
