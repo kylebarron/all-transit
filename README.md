@@ -99,9 +99,25 @@ tile-join \
 ## Schedules
 
 ```bash
-# Filter for Friday 4pm-8pm
+# Create jq filter string that keeps ScheduleStopPairs that are on Friday and
+# whose between origin_departure_time is >=4:00pm and <8:00pm
 jq_str="$(python code/schedules/construct_jq.py -d 4 -s 16 -e 20)"
-gunzip -c data/ssp/o-9xj-regionaltransportationdistrict.json.gz \
-    | jq $jq_str \
-    | cat
+
+# Loop over operators
+mkdir -p data/ssp_geom
+cat data/operator_onestop_ids.txt | while read operator_id
+do
+    # Unzip json.gz file with ScheduleStopPairs and write to stdout
+    gunzip -c data/ssp/$operator_id.json.gz \
+    `# Use jq to quickly filter above constraints for day and time` \
+    `# Write filtered json lines back to stdout` \
+    | jq -c $jq_str \
+    `# Run python script to attach geometries to ScheduleStopPairs` \
+    `# - signifies that the ScheduleStopPair json file is coming from stdin` \
+    | python code/schedules/ssp_geom.py \
+        --stops-path data/stops/$operator_id.geojson \
+        --routes-path data/routes/$operator_id.geojson \
+        - \
+        > data/ssp_geom/$operator_id.geojson
+done
 ```

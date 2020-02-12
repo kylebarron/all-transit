@@ -30,16 +30,18 @@ from shapely.ops import nearest_points, substring
     type=click.Path(exists=True, dir_okay=False, file_okay=True, readable=True),
     required=True,
     help='Path to stops.geojson, with Transit.land routes')
-@click.option(
-    '--ssp-path',
-    type=click.Path(exists=True, dir_okay=False, file_okay=True, readable=True),
-    required=True,
-    help='Path to ssp.test, with Transit.land ScheduleStopPairs')
-def main(stops_path, routes_path, ssp_path):
+@click.argument('ssp-jsonl', type=click.File())
+def main(stops_path, routes_path, ssp_jsonl):
     ag = Add_Geometry(stops_path=stops_path, routes_path=routes_path)
-    ssp_iter = ag.match_ssp_to_route(ssp_path=ssp_path)
-    for feature in ssp_iter:
-        click.echo(geojson.dumps(feature, separators=(',', ':')))
+    for line in ssp_jsonl:
+        # Parse JSON as dict
+        ssp = json.loads(line)
+
+        # Construct GeoJSON Feature of ScheduleStopPair
+        ssp_feature = ag.match_ssp_to_route(ssp)
+
+        # Write to stdout
+        click.echo(geojson.dumps(ssp_feature, separators=(',', ':')))
 
 
 class Add_Geometry:
@@ -50,16 +52,7 @@ class Add_Geometry:
         self.stops = load_list_as_dict(path=stops_path, id_key='id')
         self.routes = load_list_as_dict(path=routes_path, id_key='id')
 
-    def match_ssp_to_route(self, ssp_path):
-        """Assign geometries with interpolated timestamps to ScheduleStopPairs
-        """
-        # Iterate over lines in the ScheduleStopPairs file
-        for line in iter_file(ssp_path):
-            # Parse JSON as dict
-            ssp = json.loads(line)
-            yield self._handle_ssp(ssp)
-
-    def _handle_ssp(self, ssp):
+    def match_ssp_to_route(self, ssp):
         orig_id = ssp['origin_onestop_id']
         dest_id = ssp['destination_onestop_id']
         orig_stop = self.stops[orig_id]
