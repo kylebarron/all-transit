@@ -110,6 +110,7 @@ cat data/operator_onestop_ids.txt | while read operator_id
 do
     # If the "finished" file exists, then skip this operator id
     if [ -f data/ssp_geom/$operator_id.finished ]; then
+        echo "Already finished"
         continue
     fi
 
@@ -127,6 +128,7 @@ do
         continue
     fi
 
+    echo "Matching ScheduleStopPairs to geometries for operator: $operator_id"
     # Unzip json.gz file with ScheduleStopPairs and write to stdout
     gunzip -c data/ssp/$operator_id.json.gz \
     `# Use jq to quickly filter above constraints for day and time` \
@@ -141,6 +143,7 @@ do
         > data/ssp_geom/$operator_id.geojson
 
     # Declare that this operator id finished running
+    echo "Finished running for operator: $operator_id"
     touch data/ssp_geom/$operator_id.finished
 done
 ```
