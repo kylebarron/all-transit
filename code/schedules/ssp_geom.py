@@ -19,11 +19,23 @@ from shapely.geometry import LineString, Point, asShape
 from shapely.ops import nearest_points, substring
 
 
-def main():
-    stops_path = '/Users/kyle/github/mapping/all-transit/data/stops.geojson'
-    routes_path = '/Users/kyle/github/mapping/all-transit/data/routes.geojson'
-    ssp_path = '/Users/kyle/github/mapping/all-transit/data/ssp/test.json'
-
+@click.command()
+@click.option(
+    '--stops-path',
+    type=click.Path(exists=True, dir_okay=False, file_okay=True, readable=True),
+    required=True,
+    help='Path to stops.geojson, with Transit.land stops')
+@click.option(
+    '--routes-path',
+    type=click.Path(exists=True, dir_okay=False, file_okay=True, readable=True),
+    required=True,
+    help='Path to stops.geojson, with Transit.land routes')
+@click.option(
+    '--ssp-path',
+    type=click.Path(exists=True, dir_okay=False, file_okay=True, readable=True),
+    required=True,
+    help='Path to ssp.test, with Transit.land ScheduleStopPairs')
+def main(stops_path, routes_path, ssp_path):
     ag = Add_Geometry(stops_path=stops_path, routes_path=routes_path)
     ssp_iter = ag.match_ssp_to_route(ssp_path=ssp_path)
     for feature in ssp_iter:
