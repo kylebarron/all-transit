@@ -113,14 +113,27 @@ done
 
 Then cut these into tiles:
 ```bash
+rm -rf data/ssp_geom_tiles
 mkdir -p data/ssp_geom_tiles
 for file in data/ssp_geom/*.geojson; do
-    python code/tile_geojson.py -z 12 -Z 12 --allowed-geom-type 'LineString' -d data/ssp_geom_tiles $file
+    # If file exists and has size > 0
+    if [ -s $file ]; then
+        python code/tile_geojson.py \
+            `# Set minimum tile zoom to 12` \
+            -z 12 \
+            `# Set maximum tile zoom to 12` \
+            -Z 12 \
+            `# Only keep LineStrings` \
+            --allowed-geom-type 'LineString' \
+            `# Write tiles into the following root dir` \
+            -d data/ssp_geom_tiles $file
+    fi
 done
 ```
 
 Then compress these tiles
 ```bash
+rm -rf data/ssp_geom_tiles_comp
 mkdir -p data/ssp_geom_tiles_comp
 for file in data/ssp_geom_tiles/**/*.geojson; do
     z="$(echo $file | awk -F'/' '{print $(NF-2)}')"
