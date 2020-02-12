@@ -30,15 +30,23 @@ from shapely.ops import nearest_points, substring
     type=click.Path(exists=True, dir_okay=False, file_okay=True, readable=True),
     required=True,
     help='Path to stops.geojson, with Transit.land routes')
+@click.option(
+    '-p',
+    '--properties-keys',
+    type=str,
+    multiple=True,
+    default=[],
+    required=False,
+    help='Keys of properties to retain in outputted Features')
 @click.argument('ssp-jsonl', type=click.File())
-def main(stops_path, routes_path, ssp_jsonl):
+def main(stops_path, routes_path, properties_keys, ssp_jsonl):
     ag = Add_Geometry(stops_path=stops_path, routes_path=routes_path)
     for line in ssp_jsonl:
         # Parse JSON as dict
         ssp = json.loads(line)
 
         # Construct GeoJSON Feature of ScheduleStopPair
-        ssp_feature = ag.match_ssp_to_route(ssp)
+        ssp_feature = ag.match_ssp_to_route(ssp, properties_keys)
 
         # Write to stdout
         click.echo(geojson.dumps(ssp_feature, separators=(',', ':')))
@@ -52,7 +60,7 @@ class Add_Geometry:
         self.stops = load_list_as_dict(path=stops_path, id_key='id')
         self.routes = load_list_as_dict(path=routes_path, id_key='id')
 
-    def match_ssp_to_route(self, ssp):
+    def match_ssp_to_route(self, ssp, properties_keys):
         orig_id = ssp['origin_onestop_id']
         dest_id = ssp['destination_onestop_id']
         orig_stop = self.stops[orig_id]
@@ -119,10 +127,7 @@ class Add_Geometry:
         l = LineString(
             [(c[0], c[1], t) for c, t in zip(cut_line.coords, times)])
 
-        keep_keys = [
-            'service_start_date', 'service_end_date', 'service_days_of_week']
-        properties = {k: v for k, v in ssp.items() if k in keep_keys}
-
+        properties = {k: v for k, v in ssp.items() if k in properties_keys}
         return geojson.Feature(geometry=l, properties=properties)
 
 
