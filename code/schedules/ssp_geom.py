@@ -90,7 +90,6 @@ class Add_Geometry:
                     orig_route_point) + lineString.distance(dest_route_point)
                 dists.append(dist)
 
-            route_geom[0].equals(route_geom[1])
             min_index = dists.index(min(dists))
             line_to_split = route_geom[min_index]
 
