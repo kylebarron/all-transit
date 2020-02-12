@@ -122,3 +122,24 @@ do
         > data/ssp_geom/$operator_id.geojson
 done
 ```
+
+Then cut these into tiles:
+```bash
+mkdir -p data/ssp_geom_tiles
+for file in data/ssp_geom/*.geojson; do
+    python code/tile_geojson.py -z 11 -Z 11 --allowed-geom-type 'LineString' -d data/ssp_geom_tiles $file
+done
+```
+
+Then compress these tiles
+```bash
+mkdir -p data/ssp_geom_tiles_comp
+for file in data/ssp_geom_tiles/**/*.geojson; do
+    z="$(echo $file | awk -F'/' '{print $(NF-2)}')"
+    x="$(echo $file | awk -F'/' '{print $(NF-1)}')"
+    y="$(basename $file .geojson)"
+    mkdir -p data/ssp_geom_tiles_comp/$z/$x
+    # Take only the coordinates, minified, and gzip them
+    cat $file | jq -c '.geometry.coordinates' | gzip > data/ssp_geom_tiles_comp/$z/$x/$y.json.gz
+done
+```
