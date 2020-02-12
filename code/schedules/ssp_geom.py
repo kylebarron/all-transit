@@ -11,16 +11,21 @@ So I think the process to get geometric ScheduleStopPairs is:
 6. For each coordinate of the `LineString` between `origin` and `destination`, linearly interpolate the timestamp between the origin timestamp and destination timestamp. Shouldn't have to simplify more because the geometry should already be simplified from transitland.
 """
 import json
+import re
+
+import geojson
+from shapely.geometry import LineString, Point, asShape
+from shapely.ops import nearest_points, substring
 
 
 def main():
     pass
 
 
-class ClassName(object):
+class Add_Geometry:
     """docstring for """
-    def __init__(self, stops_path):
-        super(ClassName, self).__init__()
+    def __init__(self):
+        super(Add_Geometry, self).__init__()
 
         self.stops_path = '/Users/kyle/github/mapping/all-transit/data/stops.geojson'
         self.routes_path = '/Users/kyle/github/mapping/all-transit/data/routes.geojson'
@@ -30,8 +35,9 @@ class ClassName(object):
         self.routes = load_list_as_dict(path=self.routes_path, id_key='id')
 
     def match_ssp_to_route(self):
+        """Assign geometries with interpolated timestamps to ScheduleStopPairs
+        """
         ssp_iter = iter_file(self.ssp_path)
-        ssp = json.loads(next(ssp_iter))
         for line in ssp_iter:
             ssp = json.loads(line)
 
@@ -39,15 +45,94 @@ class ClassName(object):
             dest_id = ssp['destination_onestop_id']
             orig_stop = self.stops[orig_id]
             dest_stop = self.stops[dest_id]
+            orig_stop_geom = asShape(orig_stop['geometry'])
+            dest_stop_geom = asShape(dest_stop['geometry'])
 
             route_id = ssp['route_onestop_id']
             route = self.routes[route_id]
+            route_geom = asShape(route['geometry'])
 
-            # 4. For the origin and destination stops, find the closest point on the `RouteStopPattern`
-            # 5. Keep the `LineString` of the `RouteStopPattern` between the `origin` and `destination` coordinate
-            # 6. For each coordinate of the `LineString` between `origin` and `destination`, linearly interpolate the timestamp between the origin timestamp and destination timestamp. Shouldn't have to simplify more because the geometry should already be simplified from transitland.
+            # Note that orig_route_point and dest_route_point are not
+            # necessarily coordinates on the line; they are often interpolated
+            # 4. For the origin and destination stops, find the closest point on
+            # the `RouteStopPattern`
+            _, orig_route_point = nearest_points(orig_stop_geom, route_geom)
+            _, dest_route_point = nearest_points(dest_stop_geom, route_geom)
 
-        pass
+            if route_geom.type == 'LineString':
+                line_to_split = route_geom
+
+            elif route_geom.type == 'MultiLineString':
+                # Choose the linestring that has the shortest distance to each
+                # route point
+                dists = []
+                for lineString in route_geom:
+                    dist = lineString.distance(
+                        orig_route_point) + lineString.distance(
+                            dest_route_point)
+                    dists.append(dist)
+
+                route_geom[0].equals(route_geom[1])
+                min_index = dists.index(min(dists))
+                line_to_split = route_geom[min_index]
+
+            # Now that you have the shortest lineString, split it
+            d1 = line_to_split.project(orig_route_point)
+            d2 = line_to_split.project(dest_route_point)
+            cut_line = substring(line_to_split, d1, d2)
+
+            # 6. For each coordinate of the `LineString` between `origin` and
+            # `destination`, linearly interpolate the timestamp between the
+            # origin timestamp and destination timestamp. Shouldn't have to
+            # simplify more because the geometry should already be simplified
+            # from transitland.
+            #
+            # Get start and end times as integers
+            start_time = time_str_to_seconds(ssp['origin_departure_time'])
+            end_time = time_str_to_seconds(ssp['destination_arrival_time'])
+
+            # Interpolate proportionally to distance for every point
+            # _Technically_ it would be best to reproject into a projected
+            # coordinate system for these distance calculations, but since the
+            # distances are generally quite small, and since I only care about
+            # distance _proportions_, I'll keep measurements in degrees for now.
+            proportions = []
+            for coord in cut_line.coords:
+                proportion = cut_line.project(Point(coord), normalized=True)
+                proportions.append(proportion)
+
+            time_diff = end_time - start_time
+            times = [
+                round(start_time + (p * time_diff), 1) for p in proportions]
+
+            # Create a new geometry where the third coordinate is the
+            # interpolated timestamp.
+            l = LineString(
+                [(c[0], c[1], t) for c, t in zip(cut_line.coords, times)])
+
+            keep_keys = [
+                'service_start_date', 'service_end_date',
+                'service_days_of_week']
+            properties = {k: v for k, v in ssp.items() if k in keep_keys}
+
+            yield geojson.Feature(geometry=l, properties=properties)
+
+
+def time_str_to_seconds(s):
+    """Convert time str to integer seconds
+
+    Args:
+        - s: string of the form '%H:%M:%S'
+
+    Returns:
+        int: seconds past midnight
+    """
+    regex = r'^([0-2]\d):([0-5]\d):([0-5]\d)$'
+    match = re.match(regex, s)
+    hours = int(match.group(1))
+    minutes = int(match.group(2))
+    seconds = int(match.group(3))
+    return (hours * 60 * 60) + (minutes * 60) + seconds
 
 
 def load_list_as_dict(path, id_key):
