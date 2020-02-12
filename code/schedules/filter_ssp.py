@@ -65,7 +65,8 @@ def construct_filters(day, start_hour, end_hour):
         filters.append(s)
 
     if filters:
-        return ' and '.join(filters)
+        s = ' and '.join(filters)
+        return f'if {s} then . else empty end'
 
     else:
         return '.'
