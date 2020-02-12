@@ -38,15 +38,19 @@ def cut_geojson(features, min_zoom, max_zoom, tile_dir):
         tiles = find_tiles(geometry, min_zoom, max_zoom)
 
         for tile in tiles:
-            new_feature = geojson.Feature(
-                geometry=clip_geometry_to_tile(geometry, tile),
-                properties=feature['properties'])
+            clipped_geometries = clip_geometry_to_tile(geometry, tile)
+
+            new_features = [
+                geojson.Feature(geometry=c, properties=feature['properties'])
+                for c in clipped_geometries]
 
             # Write feature to tile_dir
             this_tile_dir = (tile_dir / str(tile.z) / str(tile.x))
             this_tile_dir.mkdir(parents=True, exist_ok=True)
             with open(this_tile_dir / f'{str(tile.y)}.geojson', 'a') as f:
-                f.write(geojson.dumps(new_feature, separators=(',', ':')))
+                for new_feature in new_features:
+                    f.write(geojson.dumps(new_feature, separators=(',', ':')))
+                    f.write('\n')
 
 
 def find_tiles(geometry, min_zoom, max_zoom):
