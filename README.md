@@ -19,24 +19,45 @@ mkdir -p data
 # All operators
 transitland operators --geometry data/gis/states/states.shp > data/operators.geojson
 
-# All routes
-transitland routes --geometry data/gis/states/states.shp > data/routes.geojson
-
 # All operator `onestop_id`s
 cat data/operators.geojson | jq '.properties.onestop_id' | uniq |  tr -d \" > data/operator_onestop_ids.txt
 
-# All stop `onestop_id`s for those routes:
-cat data/routes.geojson | jq '.properties.stops_served_by_route[].stop_onestop_id' | uniq | tr -d \" > data/stop_onestop_ids.txt
+# All routes
+transitland routes --geometry data/gis/states/states.shp > data/routes.geojson
+
+# Split these routes into different files by operator
+# NOTE: It's probably simpler to just loop over operators when calling the API
+# originally, rather than using jq to split a single file, but I didn't do that
+# the first time and I didn't want to burden the API server more.
+mkdir -p data/routes/
+cat data/operator_onestop_ids.txt | while read operator_id
+do
+    cat data/routes.geojson \
+        | jq -c "if .properties.operated_by_onestop_id == \"$operator_id\" then . else empty end" \
+        > data/routes/$operator_id.geojson
+done
 
 # All route stop patterns `onestop_id`s for those routes:
 cat data/routes.geojson | jq '.properties.route_stop_patterns_by_onestop_id[]' | uniq | tr -d \" > data/route_stop_patterns_by_onestop_id.txt
 
-# All stops (hopefully faster)
+# All stops
 rm data/stops.geojson
 cat data/operator_onestop_ids.txt | while read operator_id
 do
     transitland stops \
         --served-by $operator_id --per-page 1000 >> data/stops.geojson
+done
+
+# Split these stops into different files by operator
+# NOTE: Again, if I were doing this again, I'd just write into individual files
+# in the above step, but I didn't want to spend more time calling the API
+# server.
+mkdir -p data/stops/
+cat data/operator_onestop_ids.txt | while read operator_id
+do
+    cat data/stops.geojson \
+        | jq -c "if .properties.operators_serving_stop | any(.operator_onestop_id == \"$operator_id\") then . else empty end" \
+        > data/stops/$operator_id.geojson
 done
 
 # All route-stop-patterns (completed relatively quickly, overnight)
@@ -73,4 +94,14 @@ tile-join \
     --no-tile-size-limit \
     --force \
     stops.mbtiles operators.mbtiles routes.mbtiles
+```
+
+## Schedules
+
+```bash
+# Filter for Friday 4pm-8pm
+jq_str="$(python code/schedules/construct_jq.py -d 4 -s 16 -e 20)"
+gunzip -c data/ssp/o-9xj-regionaltransportationdistrict.json.gz \
+    | jq $jq_str \
+    | cat
 ```

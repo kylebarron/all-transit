@@ -26,7 +26,7 @@ import click
     '--day',
     type=int,
     default=None,
-    help='Service days of week. 0 is Monday, 6 is Sunday (?)')
+    help='Service days of week. 0 is Monday, 6 is Sunday')
 @click.option(
     '-s',
     '--start-hour',
