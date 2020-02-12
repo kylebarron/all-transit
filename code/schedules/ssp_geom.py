@@ -57,82 +57,81 @@ class Add_Geometry:
         for line in iter_file(ssp_path):
             # Parse JSON as dict
             ssp = json.loads(line)
+            yield self._handle_ssp(ssp)
 
-            orig_id = ssp['origin_onestop_id']
-            dest_id = ssp['destination_onestop_id']
-            orig_stop = self.stops[orig_id]
-            dest_stop = self.stops[dest_id]
-            orig_stop_geom = asShape(orig_stop['geometry'])
-            dest_stop_geom = asShape(dest_stop['geometry'])
+    def _handle_ssp(self, ssp):
+        orig_id = ssp['origin_onestop_id']
+        dest_id = ssp['destination_onestop_id']
+        orig_stop = self.stops[orig_id]
+        dest_stop = self.stops[dest_id]
+        orig_stop_geom = asShape(orig_stop['geometry'])
+        dest_stop_geom = asShape(dest_stop['geometry'])
 
-            route_id = ssp['route_onestop_id']
-            route = self.routes[route_id]
-            route_geom = asShape(route['geometry'])
+        route_id = ssp['route_onestop_id']
+        route = self.routes[route_id]
+        route_geom = asShape(route['geometry'])
 
-            # Note that orig_route_point and dest_route_point are not
-            # necessarily coordinates on the line; they are often interpolated
-            # 4. For the origin and destination stops, find the closest point on
-            # the `RouteStopPattern`
-            _, orig_route_point = nearest_points(orig_stop_geom, route_geom)
-            _, dest_route_point = nearest_points(dest_stop_geom, route_geom)
+        # Note that orig_route_point and dest_route_point are not
+        # necessarily coordinates on the line; they are often interpolated
+        # 4. For the origin and destination stops, find the closest point on
+        # the `RouteStopPattern`
+        _, orig_route_point = nearest_points(orig_stop_geom, route_geom)
+        _, dest_route_point = nearest_points(dest_stop_geom, route_geom)
 
-            if route_geom.type == 'LineString':
-                line_to_split = route_geom
+        if route_geom.type == 'LineString':
+            line_to_split = route_geom
 
-            elif route_geom.type == 'MultiLineString':
-                # Choose the linestring that has the shortest distance to each
-                # route point
-                dists = []
-                for lineString in route_geom:
-                    dist = lineString.distance(
-                        orig_route_point) + lineString.distance(
-                            dest_route_point)
-                    dists.append(dist)
+        elif route_geom.type == 'MultiLineString':
+            # Choose the linestring that has the shortest distance to each
+            # route point
+            dists = []
+            for lineString in route_geom:
+                dist = lineString.distance(
+                    orig_route_point) + lineString.distance(dest_route_point)
+                dists.append(dist)
 
-                route_geom[0].equals(route_geom[1])
-                min_index = dists.index(min(dists))
-                line_to_split = route_geom[min_index]
+            route_geom[0].equals(route_geom[1])
+            min_index = dists.index(min(dists))
+            line_to_split = route_geom[min_index]
 
-            # Now that you have the shortest lineString, split it
-            d1 = line_to_split.project(orig_route_point)
-            d2 = line_to_split.project(dest_route_point)
-            cut_line = substring(line_to_split, d1, d2)
+        # Now that you have the shortest lineString, split it
+        d1 = line_to_split.project(orig_route_point)
+        d2 = line_to_split.project(dest_route_point)
+        cut_line = substring(line_to_split, d1, d2)
 
-            # 6. For each coordinate of the `LineString` between `origin` and
-            # `destination`, linearly interpolate the timestamp between the
-            # origin timestamp and destination timestamp. Shouldn't have to
-            # simplify more because the geometry should already be simplified
-            # from transitland.
-            #
-            # Get start and end times as integers
-            start_time = time_str_to_seconds(ssp['origin_departure_time'])
-            end_time = time_str_to_seconds(ssp['destination_arrival_time'])
+        # 6. For each coordinate of the `LineString` between `origin` and
+        # `destination`, linearly interpolate the timestamp between the
+        # origin timestamp and destination timestamp. Shouldn't have to
+        # simplify more because the geometry should already be simplified
+        # from transitland.
+        #
+        # Get start and end times as integers
+        start_time = time_str_to_seconds(ssp['origin_departure_time'])
+        end_time = time_str_to_seconds(ssp['destination_arrival_time'])
 
-            # Interpolate proportionally to distance for every point
-            # _Technically_ it would be best to reproject into a projected
-            # coordinate system for these distance calculations, but since the
-            # distances are generally quite small, and since I only care about
-            # distance _proportions_, I'll keep measurements in degrees for now.
-            proportions = []
-            for coord in cut_line.coords:
-                proportion = cut_line.project(Point(coord), normalized=True)
-                proportions.append(proportion)
+        # Interpolate proportionally to distance for every point
+        # _Technically_ it would be best to reproject into a projected
+        # coordinate system for these distance calculations, but since the
+        # distances are generally quite small, and since I only care about
+        # distance _proportions_, I'll keep measurements in degrees for now.
+        proportions = []
+        for coord in cut_line.coords:
+            proportion = cut_line.project(Point(coord), normalized=True)
+            proportions.append(proportion)
 
-            time_diff = end_time - start_time
-            times = [
-                round(start_time + (p * time_diff), 1) for p in proportions]
+        time_diff = end_time - start_time
+        times = [round(start_time + (p * time_diff), 1) for p in proportions]
 
-            # Create a new geometry where the third coordinate is the
-            # interpolated timestamp.
-            l = LineString(
-                [(c[0], c[1], t) for c, t in zip(cut_line.coords, times)])
+        # Create a new geometry where the third coordinate is the
+        # interpolated timestamp.
+        l = LineString(
+            [(c[0], c[1], t) for c, t in zip(cut_line.coords, times)])
 
-            keep_keys = [
-                'service_start_date', 'service_end_date',
-                'service_days_of_week']
-            properties = {k: v for k, v in ssp.items() if k in keep_keys}
+        keep_keys = [
+            'service_start_date', 'service_end_date', 'service_days_of_week']
+        properties = {k: v for k, v in ssp.items() if k in keep_keys}
 
-            yield geojson.Feature(geometry=l, properties=properties)
+        return geojson.Feature(geometry=l, properties=properties)
 
 
 def time_str_to_seconds(s):
