@@ -32,6 +32,7 @@ from shapely.ops import split
     '--allowed-geom-type',
     type=str,
     required=False,
+    multiple=True,
     default=[],
     help='Geometry types to keep in exported GeoJSON features.')
 def cut_geojson(features, min_zoom, max_zoom, tile_dir, allowed_geom_type):
