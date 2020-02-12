@@ -30,6 +30,9 @@ function ssp_geom() {
     jq_str="$(python code/schedules/construct_jq.py --day-of-week 4 --start-hour 16 --end-hour 20 --service-date '2020-02-07')"
 
     echo "Matching ScheduleStopPairs to geometries for operator: $operator_id"
+    # Make sure output directory exists
+    mkdir -p data/ssp_geom
+
     # Unzip json.gz file with ScheduleStopPairs and write to stdout
     gunzip -c data/ssp/$operator_id.json.gz \
     `# Use jq to quickly filter above constraints for day and time` \

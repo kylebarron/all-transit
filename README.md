@@ -99,9 +99,7 @@ tile-join \
 ## Schedules
 
 ```bash
-
 # Loop over operators
-mkdir -p data/ssp_geom
 cat data/operator_onestop_ids.txt | while read operator_id
 do
     bash code/schedules/main.sh $operator_id
