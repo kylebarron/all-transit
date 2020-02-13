@@ -2,7 +2,6 @@ import * as React from "react";
 import DeckGL from "@deck.gl/react";
 import { MapController } from "deck.gl";
 import { TileLayer, TripsLayer } from "@deck.gl/geo-layers";
-// import { load } from "@loaders.gl/core";
 import InteractiveMap, {
   _MapContext as MapContext,
   NavigationControl
@@ -38,8 +37,53 @@ class Map extends React.Component {
     includeBus: true,
     includeFerry: true,
     includeCablecar: true,
-    time: 57700
+    time: 65391
   };
+
+  componentDidMount() {
+    this._animate();
+  }
+
+  componentWillUnmount() {
+    if (this._animationFrame) {
+      window.cancelAnimationFrame(this._animationFrame);
+    }
+  }
+
+  _animate() {
+    const {
+      // unit corresponds to the timestamp in source data
+      // My trip timestamps are in seconds between 4pm and 8pm => 14400 seconds
+      loopLength = 14400,
+      // unit time per second
+      // So essentially 30 would be 30x; every real second corresponds to 30
+      // trip-layer seconds.
+      animationSpeed = 200
+    } = this.props;
+
+    // The start timeStamp in the data
+    // This is added to all calculated timestamps
+    const secondsStart = 16 * 60 * 60;
+
+    // Date.now() is in milliseconds; divide by 1000 to get seconds
+    const timestamp = Date.now() / 1000;
+
+    // How many loop segments are there? I.e. with a loopLength of 1000 and an
+    // animationSpeed of 10, then there are 100 individual loop segments to
+    // render
+    const loopSegments = loopLength / animationSpeed;
+
+    // `timestamp % loopSegments`
+    // Take the remainder of dividing timestamp by loopSegments
+
+    this.setState({
+      time:
+        ((timestamp % loopSegments) / loopSegments) * loopLength + secondsStart
+    });
+    this._animationFrame = window.requestAnimationFrame(
+      this._animate.bind(this)
+    );
+  }
 
   // Called on click by deck.gl
   // event.x, event.y are the clicked x and y coordinates in pixels
@@ -139,6 +183,11 @@ class Map extends React.Component {
             response.json()
           ),
 
+        // this prop is passed on to the TripsLayer that's rendered as a
+        // SubLayer. Otherwise, the TripsLayer can't access the state being
+        // updated.
+        currentTime: this.state.time,
+
         renderSubLayers: props => {
           return new TripsLayer(props, {
             data: props.data,
@@ -149,7 +198,7 @@ class Map extends React.Component {
             widthMinPixels: 2,
             rounded: true,
             trailLength: 500,
-            currentTime: this.state.time,
+            currentTime: props.currentTime,
             shadowEnabled: false
           });
         }
