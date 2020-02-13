@@ -10,11 +10,18 @@ All transit in the continental US, as reported by the [Transitland
 database](https://transit.land). Inspired by [_All
 Streets_](https://benfry.com/allstreets/map5.html).
 
-Most of the data-generating code for this project is done in Bash,
-[`jq`](https://stedolan.github.io/jq/), GNU Parallel, and a couple Python
-scripts. The code for the website is in `site/`.
+## Website
+
+The code for the website is in `site/`. It uses React, Gatsby, Deck.gl, and
+React Map GL/Mapbox GL JS.
 
 ## Data
+
+Most of the data-generating code for this project is done in Bash,
+[`jq`](https://stedolan.github.io/jq/), GNU Parallel, and a couple Python
+scripts. Data is kept in _newline-delimited JSON_ and _newline-delimited
+GeoJSON_ for all intermediate steps to facilitate streaming and keep memory use
+low.
 
 ### Data Download
 
@@ -232,19 +239,33 @@ for i in {1..5}; do
 done
 ```
 
-### Put into vector tiles
+### Vector tiles for Operators, Routes, Stops
+
+I generate vector tiles for the routes, operators, and stops. I have `jq`
+filters in `code/jq/` to reshape the GeoJSON into the format I want, so that the
+correct properties are included in the vector tiles.
+
+In order to keep the size of the vector tiles small:
+
+- The `stops` layer is only included at zoom 11
+- The `routes` layer only includes metadata about the identifiers of the stops
+  that it passes at zoom 11
 
 ```bash
 # Writes mbtiles to data/routes.mbtiles
 # The -c is important so that each feature gets output onto a single line
-cat data/routes.geojson | jq -c -f code/jq/routes.jq | bash code/tippecanoe/routes.sh
+cat data/routes.geojson \
+    | jq -c -f code/jq/routes.jq \
+    | bash code/tippecanoe/routes.sh
 
 # Writes mbtiles to data/operators.mbtiles
 bash code/tippecanoe/operators.sh data/operators.geojson
 
 # Writes mbtiles to data/stops.mbtiles
 # The -c is important so that each feature gets output onto a single line
-cat data/stops.geojson | jq -c -f code/jq/stops.jq | bash code/tippecanoe/stops.sh
+cat data/stops.geojson \
+    | jq -c -f code/jq/stops.jq \
+    | bash code/tippecanoe/stops.sh
 ```
 
 Combine into single mbtiles
@@ -256,7 +277,7 @@ tile-join \
     stops.mbtiles operators.mbtiles routes.mbtiles
 ```
 
-## Schedules
+### Schedules
 
 NOTE: Figure out a way to select by ssp id?? I.e. you're matching _StopPairs_ to
 geometries, and then saving those geometries, and then ideally later when you
