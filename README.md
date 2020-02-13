@@ -313,15 +313,15 @@ done
 ```
 
 ```bash
-# Create jq filter string that keeps ScheduleStopPairs that are on Friday,
-# whose between origin_departure_time is >=4:00pm and <8:00pm, and that ran on
-# Feb 7, 2020
-jq_str="$(python code/schedules/construct_jq.py --day-of-week 4 --start-hour 16 --end-hour 20 --service-date '2020-02-07')"
-
-# Loop over operators
-cat data/operator_onestop_ids.txt | while read operator_id
-do
-    bash code/schedules/ssp_geom.sh $operator_id "$jq_str"
+# Loop over _routes_
+for i in {1..5}; do
+    cat data/routes_onestop_ids_${i}.txt | while read route_id
+    do
+        # Find _a_ route with this route_id from routes.geojson so that I can
+        # get its operator id
+        operator_id=$(cat routes.geojson | jq -c "if .properties.onestop_id == \"$route_id\" then .properties.operated_by_onestop_id else empty end" | head -n 1 | tr -d \")
+        bash code/schedules/ssp_geom.sh "$operator_id" "$route_id"
+    done
 done
 ```
 

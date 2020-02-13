@@ -39,13 +39,16 @@ from shapely.ops import nearest_points, substring
     default=[],
     required=False,
     help='Keys of properties to retain in outputted Features')
-@click.argument('ssp-jsonl', type=click.File())
-def main(stops_path, routes_path, properties_keys, ssp_jsonl):
+@click.argument('ssp-lines', type=click.File())
+def main(stops_path, routes_path, properties_keys, ssp_lines):
     ag = ScheduleStopPairGeometry(
         stops_path=stops_path, routes_path=routes_path)
-    for line in ssp_jsonl:
+
+    header_line = next(ssp_lines).strip()
+    headers = header_line.split('|')
+    for line in ssp_lines:
         # Parse JSON as dict
-        ssp = json.loads(line)
+        ssp = {k: v for k, v in zip(headers, line.strip().split('|'))}
 
         # Construct GeoJSON Feature of ScheduleStopPair
         ssp_feature = ag.match_ssp_to_route(ssp, properties_keys)
