@@ -1,12 +1,21 @@
 import * as React from "react";
 import DeckGL from "@deck.gl/react";
 import { MapController } from "deck.gl";
+import { TileLayer, TripsLayer } from "@deck.gl/geo-layers";
+// import { load } from "@loaders.gl/core";
 import InteractiveMap, {
   _MapContext as MapContext,
   NavigationControl
 } from "react-map-gl";
 import { getInitialViewState } from "./utils";
-import { Container, Accordion, Icon, Menu, Checkbox, Grid } from "semantic-ui-react";
+import {
+  Container,
+  Accordion,
+  Icon,
+  Menu,
+  Checkbox,
+  Grid
+} from "semantic-ui-react";
 import { TransitLayer, interactiveLayerIds } from "./TransitLayer";
 
 // You'll get obscure errors without including the Mapbox GL CSS
@@ -29,6 +38,7 @@ class Map extends React.Component {
     includeBus: true,
     includeFerry: true,
     includeCablecar: true,
+    time: 57700
   };
 
   // Called on click by deck.gl
@@ -117,6 +127,36 @@ class Map extends React.Component {
     this.setState(newState);
   };
 
+  _renderDeckLayers() {
+    const baseurl = "https://data.kylebarron.dev/all-transit/schedule/4_16-20";
+
+    return [
+      new TileLayer({
+        minZoom: 12,
+        maxZoom: 12,
+        getTileData: ({ x, y, z }) =>
+          fetch(`${baseurl}/${z}/${x}/${y}.json`).then(response =>
+            response.json()
+          ),
+
+        renderSubLayers: props => {
+          return new TripsLayer(props, {
+            data: props.data,
+            getPath: d => d.map(p => p.slice(0, 2)),
+            getTimestamps: d => d.map(p => p.slice(2)),
+            getColor: [253, 128, 93],
+            opacity: 0.5,
+            widthMinPixels: 2,
+            rounded: true,
+            trailLength: 500,
+            currentTime: this.state.time,
+            shadowEnabled: false
+          });
+        }
+      })
+    ];
+  }
+
   render() {
     const { location } = this.props;
     const {
@@ -138,6 +178,7 @@ class Map extends React.Component {
           ContextProvider={MapContext.Provider}
           onClick={this._updatePicked}
           onHover={this._updatePicked}
+          layers={this._renderDeckLayers()}
           pickingRadius={pickingRadius}
           onViewStateChange={this.onViewStateChange}
         >
@@ -211,14 +252,8 @@ class Map extends React.Component {
               )}
               <Grid columns={1} relaxed>
                 <Grid.Column>
-                  {[
-                    "Tram",
-                    "Metro",
-                    "Rail",
-                    "Bus",
-                    "Ferry",
-                    "Cablecar",
-                  ].map(mode => (
+                  {["Tram", "Metro", "Rail", "Bus", "Ferry", "Cablecar"].map(
+                    mode => (
                     <Grid.Row>
                       <Checkbox
                         toggle
@@ -227,7 +262,8 @@ class Map extends React.Component {
                         checked={this.state[`include${mode}`]}
                       />
                     </Grid.Row>
-                  ))}
+                    )
+                  )}
                 </Grid.Column>
               </Grid>
             </Accordion.Content>
