@@ -285,6 +285,33 @@ have many different _ScheduleStopPairs_ corresponding to those _StopPairs_ you
 should be able to loop over them quickly instead of having to match the
 _ScheduleStopPair_ to a geometry every time.
 
+Try to import `ScheduleStopPair` data into sqlite.
+```bash
+# Create CSV file with data
+mkdir -p data/ssp_sqlite/
+for i in {1..5}; do
+    # header line
+    gunzip -c data/ssp/ssp${i}.json.gz \
+        | head -n 1 \
+        | jq -rf code/ssp/ssp_keys.jq \
+        | gzip \
+        > data/ssp_sqlite/ssp${i}.csv.gz
+    # Data
+    gunzip -c data/ssp/ssp${i}.json.gz \
+        | jq -rf code/ssp/ssp_values.jq \
+        | gzip \
+        >> data/ssp_sqlite/ssp${i}.csv.gz
+done
+```
+
+Import CSV into sqlite3 db
+```bash
+for i in {1..5}; do
+    gunzip -c data/ssp_sqlite/ssp${i}.csv.gz \
+        | sqlite3 -csv data/ssp_sqlite/ssp.db '.import /dev/stdin ssp'
+done
+```
+
 ```bash
 # Create jq filter string that keeps ScheduleStopPairs that are on Friday,
 # whose between origin_departure_time is >=4:00pm and <8:00pm, and that ran on
