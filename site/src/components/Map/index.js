@@ -22,6 +22,7 @@ import "../../css/mapbox-gl.css";
 
 const pickingRadius = 10;
 const minHighlightZoom = 11;
+const minAnimationZoom = 12;
 
 function timeToStr(time, options = {}) {
   const { showSeconds = false } = options;
@@ -57,6 +58,8 @@ class Map extends React.Component {
     time: 65391
   };
 
+  // TODO: start and stop animations when zooming below or above
+  // minAnimationZoom
   componentDidMount() {
     this._animate();
   }
@@ -226,7 +229,8 @@ class Map extends React.Component {
     const {
       highlightedStopsOnestopIds,
       highlightedRoutesOnestopIds,
-      zoom
+      zoom,
+      time
     } = this.state;
 
     return (
@@ -262,7 +266,7 @@ class Map extends React.Component {
                 rail: this.state.includeRail,
                 bus: this.state.includeBus,
                 ferry: this.state.includeFerry,
-                cablecar: this.state.includeCablecar,
+                cablecar: this.state.includeCablecar
               }}
             />
           </InteractiveMap>
@@ -286,7 +290,9 @@ class Map extends React.Component {
             overflowY: "auto"
           }}
         >
-          <p>Time: Friday {timeToStr(this.state.time)}</p>
+          {zoom >= minAnimationZoom && (
+            <p>Time: Friday {timeToStr(this.state.time)}</p>
+          )}
           <Accordion as={Menu} vertical fluid styled style={{ maxWidth: 240 }}>
             <Accordion.Title
               active={this.state.filterBoxExpanded}
@@ -297,7 +303,7 @@ class Map extends React.Component {
               Filters
             </Accordion.Title>
             <Accordion.Content active={this.state.filterBoxExpanded}>
-              {zoom < 11 ? (
+              {zoom < minHighlightZoom ? (
                 <p>Zoom in for more options</p>
               ) : (
                 <div>
@@ -319,14 +325,14 @@ class Map extends React.Component {
                 <Grid.Column>
                   {["Tram", "Metro", "Rail", "Bus", "Ferry", "Cablecar"].map(
                     mode => (
-                    <Grid.Row>
-                      <Checkbox
-                        toggle
-                        label={`${mode}`}
-                        onChange={() => this._toggleState(`include${mode}`)}
-                        checked={this.state[`include${mode}`]}
-                      />
-                    </Grid.Row>
+                      <Grid.Row>
+                        <Checkbox
+                          toggle
+                          label={`${mode}`}
+                          onChange={() => this._toggleState(`include${mode}`)}
+                          checked={this.state[`include${mode}`]}
+                        />
+                      </Grid.Row>
                     )
                   )}
                 </Grid.Column>
