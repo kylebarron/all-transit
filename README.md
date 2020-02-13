@@ -294,7 +294,7 @@ jq_str="$(python code/schedules/construct_jq.py --day-of-week 4 --start-hour 16 
 # Loop over operators
 cat data/operator_onestop_ids.txt | while read operator_id
 do
-    bash code/schedules/main.sh $operator_id "$jq_str"
+    bash code/schedules/ssp_geom.sh $operator_id "$jq_str"
 done
 ```
 
