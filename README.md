@@ -141,7 +141,12 @@ for file in data/ssp_geom_tiles/**/*.geojson; do
     y="$(basename $file .geojson)"
     mkdir -p data/ssp_geom_tiles_comp/$z/$x
     # Take only the coordinates, minified, and gzip them
-    cat $file | jq -c '.geometry.coordinates' | gzip > data/ssp_geom_tiles_comp/$z/$x/$y.json
+    cat $file \
+    `# Take only the coordinates of each GeoJSON record` \
+    | jq -c '.geometry.coordinates' \
+    `# Convert JSONlines to JSON` \
+    | jq -cs '.' \
+    | gzip > data/ssp_geom_tiles_comp/$z/$x/$y.json
 done
 ```
 
