@@ -23,6 +23,23 @@ import "../../css/mapbox-gl.css";
 const pickingRadius = 10;
 const minHighlightZoom = 11;
 
+function timeToStr(time, options = {}) {
+  const { showSeconds = false } = options;
+  const date = new Date(time * 1000);
+  const hours = String(date.getUTCHours()).padStart(2, "0");
+  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+  const seconds = String(date.getUTCSeconds()).padStart(2, "0");
+
+  // Will display time in 10:30:23 format
+  let formattedTime;
+  if (!showSeconds) {
+    formattedTime = hours + ":" + minutes;
+  } else {
+    formattedTime = hours + ":" + minutes + ":" + seconds;
+  }
+  return formattedTime;
+}
+
 class Map extends React.Component {
   state = {
     filterBoxExpanded: null,
@@ -58,7 +75,7 @@ class Map extends React.Component {
       // unit time per second
       // So essentially 30 would be 30x; every real second corresponds to 30
       // trip-layer seconds.
-      animationSpeed = 200
+      animationSpeed = 100
     } = this.props;
 
     // The start timeStamp in the data
@@ -75,11 +92,9 @@ class Map extends React.Component {
 
     // `timestamp % loopSegments`
     // Take the remainder of dividing timestamp by loopSegments
-
-    this.setState({
-      time:
-        ((timestamp % loopSegments) / loopSegments) * loopLength + secondsStart
-    });
+    const time =
+      ((timestamp % loopSegments) / loopSegments) * loopLength + secondsStart;
+    this.setState({ time: time });
     this._animationFrame = window.requestAnimationFrame(
       this._animate.bind(this)
     );
@@ -197,7 +212,7 @@ class Map extends React.Component {
             opacity: 0.5,
             widthMinPixels: 2,
             rounded: true,
-            trailLength: 500,
+            trailLength: 200,
             currentTime: props.currentTime,
             shadowEnabled: false
           });
@@ -271,6 +286,7 @@ class Map extends React.Component {
             overflowY: "auto"
           }}
         >
+          <p>Time: Friday {timeToStr(this.state.time)}</p>
           <Accordion as={Menu} vertical fluid styled style={{ maxWidth: 240 }}>
             <Accordion.Title
               active={this.state.filterBoxExpanded}
