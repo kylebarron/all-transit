@@ -141,6 +141,17 @@ for file in data/ssp_geom_tiles/**/*.geojson; do
     y="$(basename $file .geojson)"
     mkdir -p data/ssp_geom_tiles_comp/$z/$x
     # Take only the coordinates, minified, and gzip them
-    cat $file | jq -c '.geometry.coordinates' | gzip > data/ssp_geom_tiles_comp/$z/$x/$y.json.gz
+    cat $file | jq -c '.geometry.coordinates' | gzip > data/ssp_geom_tiles_comp/$z/$x/$y.json
 done
+```
+
+Upload to AWS
+```bash
+aws s3 cp \
+    data/ssp_geom_tiles_comp s3://data.kylebarron.dev/all-transit/schedule/4_16-20/ \
+    --recursive \
+    --content-type application/json \
+    --content-encoding gzip \
+    `# Set to public read access` \
+    --acl public-read
 ```
