@@ -260,11 +260,38 @@ class Map extends React.Component {
                       operator_onestop_id
                     ] = !thisOperatorDisabled;
 
-                    return {operatorsDisabled: operatorsDisabled}
+                    return { operatorsDisabled: operatorsDisabled };
                   });
                 }}
               />
             </div>
+          )
+        }
+      }
+    ];
+
+    const transitModeAccordionPanels = [
+      {
+        key: "transitMode",
+        title: "Transit Modes",
+        content: {
+          content: (
+            <Grid columns={1} relaxed>
+              <Grid.Column>
+                {["Tram", "Metro", "Rail", "Bus", "Ferry", "Cablecar"].map(
+                  mode => (
+                    <Grid.Row>
+                      <Checkbox
+                        toggle
+                        label={`${mode}`}
+                        onChange={() => this._toggleState(`include${mode}`)}
+                        checked={this.state[`include${mode}`]}
+                      />
+                    </Grid.Row>
+                  )
+                )}
+              </Grid.Column>
+            </Grid>
           )
         }
       }
@@ -337,16 +364,11 @@ class Map extends React.Component {
                   <p>Time: Friday {timeToStr(time)}</p>
                 )}
                 {zoom >= 10 && (
-                  <Accordion
-                    vertical
-                    fluid
-                    styled
-                    panels={operatorsAccordionPanels}
-                  />
+                  <Accordion fluid styled panels={operatorsAccordionPanels} />
                 )}
+                <Accordion fluid styled panels={transitModeAccordionPanels} />
                 <Accordion
                   as={Menu}
-                  vertical
                   fluid
                   styled
                   // style={{ maxWidth: 240 }}
@@ -380,29 +402,6 @@ class Map extends React.Component {
                   /> */}
                       </div>
                     )}
-                    <Grid columns={1} relaxed>
-                      <Grid.Column>
-                        {[
-                          "Tram",
-                          "Metro",
-                          "Rail",
-                          "Bus",
-                          "Ferry",
-                          "Cablecar"
-                        ].map(mode => (
-                          <Grid.Row>
-                            <Checkbox
-                              toggle
-                              label={`${mode}`}
-                              onChange={() =>
-                                this._toggleState(`include${mode}`)
-                              }
-                              checked={this.state[`include${mode}`]}
-                            />
-                          </Grid.Row>
-                        ))}
-                      </Grid.Column>
-                    </Grid>
                   </Accordion.Content>
                 </Accordion>
               </Card.Description>
