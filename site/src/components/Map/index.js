@@ -22,7 +22,7 @@ import "../../css/mapbox-gl.css";
 
 const pickingRadius = 10;
 const minHighlightZoom = 11;
-const minAnimationZoom = 12;
+const minAnimationZoom = 2;
 
 function timeToStr(time, options = {}) {
   const { showSeconds = false } = options;
@@ -194,7 +194,7 @@ class Map extends React.Component {
 
     return [
       new TileLayer({
-        minZoom: 12,
+        minZoom: minAnimationZoom,
         maxZoom: 12,
         getTileData: ({ x, y, z }) =>
           fetch(`${baseurl}/${z}/${x}/${y}.json`).then(response =>
@@ -215,7 +215,7 @@ class Map extends React.Component {
             opacity: 0.5,
             widthMinPixels: 2,
             rounded: true,
-            trailLength: 200,
+            trailLength: 100,
             currentTime: props.currentTime,
             shadowEnabled: false
           });
