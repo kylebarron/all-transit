@@ -29,6 +29,7 @@ export function OperatorsList(props) {
     <List>
       {uniqueOperators.map(operator => (
         <ListItem
+          key={operator.onestop_id}
           operator={operator}
           onChange={onChange}
           operatorsDisabled={operatorsDisabled}
