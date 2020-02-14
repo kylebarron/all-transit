@@ -22,7 +22,7 @@ import "../../css/mapbox-gl.css";
 
 const pickingRadius = 10;
 const minHighlightZoom = 11;
-const minAnimationZoom = 2;
+const minAnimationZoom = 11;
 
 function timeToStr(time, options = {}) {
   const { showSeconds = false } = options;
