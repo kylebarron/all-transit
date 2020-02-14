@@ -76,7 +76,7 @@ class Map extends React.Component {
       // unit time per second
       // So essentially 30 would be 30x; every real second corresponds to 30
       // trip-layer seconds.
-      animationSpeed = 100
+      animationSpeed = 70
     } = this.props;
 
     // The start timeStamp in the data
