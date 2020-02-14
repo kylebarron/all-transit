@@ -7,7 +7,14 @@ import InteractiveMap, {
   NavigationControl
 } from "react-map-gl";
 import { getInitialViewState, timeToStr } from "./utils";
-import { Container, Accordion, Checkbox, Card, Grid } from "semantic-ui-react";
+import {
+  Container,
+  Accordion,
+  Checkbox,
+  Card,
+  Grid,
+  Icon
+} from "semantic-ui-react";
 import { TransitLayer, interactiveLayerIds } from "./TransitLayer";
 import { OperatorsList } from "./OperatorsList";
 import { Link } from "gatsby";
@@ -21,6 +28,7 @@ const minAnimationZoom = 11;
 
 class Map extends React.Component {
   state = {
+    optionsExpanded: false,
     highlightStopsByRoute: false,
     highlightRoutesByStop: false,
     highlightedStopsOnestopIds: [],
@@ -367,8 +375,8 @@ class Map extends React.Component {
         <Container
           style={{
             position: "absolute",
-            width: 240,
-            maxWidth: 300,
+            width: 280,
+            maxWidth: 400,
             left: 10,
             top: 10,
             maxHeight: "70%",
@@ -378,19 +386,36 @@ class Map extends React.Component {
             overflowY: "auto"
           }}
         >
-          <Card>
+          <Accordion as={Card}>
             <Card.Content>
-              <Card.Header textAlign="center">All Transit</Card.Header>
-              <Card.Meta textAlign="center">
-                <Link as={Link} to="/about/">
-                  About
-                </Link>
-              </Card.Meta>
-              <Card.Description>
-                <Accordion fluid styled panels={optionsPanels} />
-              </Card.Description>
+              <Accordion.Title
+                as={Card.Header}
+                active={this.state.optionsExpanded}
+                onClick={() => this._toggleState("optionsExpanded")}
+              >
+                <Grid columns={2}>
+                  <Grid.Row>
+                    <Grid.Column width={1}>
+                      <Icon name="dropdown" />
+                    </Grid.Column>
+                    <Grid.Column width={20}>
+                      <Card.Header textAlign="center">All Transit</Card.Header>
+                    </Grid.Column>
+                  </Grid.Row>
+                </Grid>
+              </Accordion.Title>
+              <Accordion.Content active={this.state.optionsExpanded}>
+                <Card.Meta textAlign="left">
+                  <Link as={Link} to="/about/">
+                    About
+                  </Link>
+                </Card.Meta>
+                <Card.Description>
+                  <Accordion fluid styled panels={optionsPanels} />
+                </Card.Description>
+              </Accordion.Content>
             </Card.Content>
-          </Card>
+          </Accordion>
         </Container>
       </div>
     );

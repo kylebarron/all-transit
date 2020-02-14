@@ -226,6 +226,7 @@ export function TransitLayer(props) {
         source-layer="routes"
         type="symbol"
         filter={routesFilter}
+        minzoom={13}
         layout={{
           "symbol-placement": "line",
           "text-anchor": "center",
