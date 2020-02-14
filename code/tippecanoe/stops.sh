@@ -15,9 +15,8 @@ tippecanoe \
     --layer='stops' \
     `# Read input in parallel` \
     -P \
-    `# Set maximum zoom to 10` \
+    `# Set minimum and maximum zoom` \
     --maximum-zoom=11 \
-    `# Set minimum zoom to 0` \
     --minimum-zoom=11 \
     `# overwrite` \
     --force \

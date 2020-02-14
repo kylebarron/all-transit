@@ -1,12 +1,20 @@
 import * as React from "react";
 import DeckGL from "@deck.gl/react";
 import { MapController } from "deck.gl";
+import { TileLayer, TripsLayer } from "@deck.gl/geo-layers";
 import InteractiveMap, {
   _MapContext as MapContext,
   NavigationControl
 } from "react-map-gl";
 import { getInitialViewState } from "./utils";
-import { Container, Accordion, Icon, Menu, Checkbox, Grid } from "semantic-ui-react";
+import {
+  Container,
+  Accordion,
+  Icon,
+  Menu,
+  Checkbox,
+  Grid
+} from "semantic-ui-react";
 import { TransitLayer, interactiveLayerIds } from "./TransitLayer";
 
 // You'll get obscure errors without including the Mapbox GL CSS
@@ -14,6 +22,24 @@ import "../../css/mapbox-gl.css";
 
 const pickingRadius = 10;
 const minHighlightZoom = 11;
+const minAnimationZoom = 2;
+
+function timeToStr(time, options = {}) {
+  const { showSeconds = false } = options;
+  const date = new Date(time * 1000);
+  const hours = String(date.getUTCHours()).padStart(2, "0");
+  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+  const seconds = String(date.getUTCSeconds()).padStart(2, "0");
+
+  // Will display time in 10:30:23 format
+  let formattedTime;
+  if (!showSeconds) {
+    formattedTime = hours + ":" + minutes;
+  } else {
+    formattedTime = hours + ":" + minutes + ":" + seconds;
+  }
+  return formattedTime;
+}
 
 class Map extends React.Component {
   state = {
@@ -29,7 +55,51 @@ class Map extends React.Component {
     includeBus: true,
     includeFerry: true,
     includeCablecar: true,
+    time: 65391
   };
+
+  componentDidMount() {
+    this._animate();
+  }
+
+  componentWillUnmount() {
+    if (this._animationFrame) {
+      window.cancelAnimationFrame(this._animationFrame);
+    }
+  }
+
+  _animate() {
+    const {
+      // unit corresponds to the timestamp in source data
+      // My trip timestamps are in seconds between 4pm and 8pm => 14400 seconds
+      loopLength = 14400,
+      // unit time per second
+      // So essentially 30 would be 30x; every real second corresponds to 30
+      // trip-layer seconds.
+      animationSpeed = 100
+    } = this.props;
+
+    // The start timeStamp in the data
+    // This is added to all calculated timestamps
+    const secondsStart = 16 * 60 * 60;
+
+    // Date.now() is in milliseconds; divide by 1000 to get seconds
+    const timestamp = Date.now() / 1000;
+
+    // How many loop segments are there? I.e. with a loopLength of 1000 and an
+    // animationSpeed of 10, then there are 100 individual loop segments to
+    // render
+    const loopSegments = loopLength / animationSpeed;
+
+    // `timestamp % loopSegments`
+    // Take the remainder of dividing timestamp by loopSegments
+    const time =
+      ((timestamp % loopSegments) / loopSegments) * loopLength + secondsStart;
+    this.setState({ time: time });
+    this._animationFrame = window.requestAnimationFrame(
+      this._animate.bind(this)
+    );
+  }
 
   // Called on click by deck.gl
   // event.x, event.y are the clicked x and y coordinates in pixels
@@ -117,12 +187,48 @@ class Map extends React.Component {
     this.setState(newState);
   };
 
+  _renderDeckLayers() {
+    const baseurl = "https://data.kylebarron.dev/all-transit/schedule/4_16-20";
+
+    return [
+      new TileLayer({
+        minZoom: minAnimationZoom,
+        maxZoom: 12,
+        getTileData: ({ x, y, z }) =>
+          fetch(`${baseurl}/${z}/${x}/${y}.json`).then(response =>
+            response.json()
+          ),
+
+        // this prop is passed on to the TripsLayer that's rendered as a
+        // SubLayer. Otherwise, the TripsLayer can't access the state being
+        // updated.
+        currentTime: this.state.time,
+
+        renderSubLayers: props => {
+          return new TripsLayer(props, {
+            data: props.data,
+            getPath: d => d.map(p => p.slice(0, 2)),
+            getTimestamps: d => d.map(p => p.slice(2)),
+            getColor: [253, 128, 93],
+            opacity: 0.6,
+            widthMinPixels: 2,
+            rounded: true,
+            trailLength: 60,
+            currentTime: props.currentTime,
+            shadowEnabled: false
+          });
+        }
+      })
+    ];
+  }
+
   render() {
     const { location } = this.props;
     const {
       highlightedStopsOnestopIds,
       highlightedRoutesOnestopIds,
-      zoom
+      zoom,
+      time
     } = this.state;
 
     return (
@@ -138,6 +244,7 @@ class Map extends React.Component {
           ContextProvider={MapContext.Provider}
           onClick={this._updatePicked}
           onHover={this._updatePicked}
+          layers={this._renderDeckLayers()}
           pickingRadius={pickingRadius}
           onViewStateChange={this.onViewStateChange}
         >
@@ -157,7 +264,7 @@ class Map extends React.Component {
                 rail: this.state.includeRail,
                 bus: this.state.includeBus,
                 ferry: this.state.includeFerry,
-                cablecar: this.state.includeCablecar,
+                cablecar: this.state.includeCablecar
               }}
             />
           </InteractiveMap>
@@ -181,6 +288,9 @@ class Map extends React.Component {
             overflowY: "auto"
           }}
         >
+          {zoom >= minAnimationZoom && (
+            <p>Time: Friday {timeToStr(time)}</p>
+          )}
           <Accordion as={Menu} vertical fluid styled style={{ maxWidth: 240 }}>
             <Accordion.Title
               active={this.state.filterBoxExpanded}
@@ -191,7 +301,7 @@ class Map extends React.Component {
               Filters
             </Accordion.Title>
             <Accordion.Content active={this.state.filterBoxExpanded}>
-              {zoom < 11 ? (
+              {zoom < minHighlightZoom ? (
                 <p>Zoom in for more options</p>
               ) : (
                 <div>
@@ -211,23 +321,18 @@ class Map extends React.Component {
               )}
               <Grid columns={1} relaxed>
                 <Grid.Column>
-                  {[
-                    "Tram",
-                    "Metro",
-                    "Rail",
-                    "Bus",
-                    "Ferry",
-                    "Cablecar",
-                  ].map(mode => (
-                    <Grid.Row>
-                      <Checkbox
-                        toggle
-                        label={`${mode}`}
-                        onChange={() => this._toggleState(`include${mode}`)}
-                        checked={this.state[`include${mode}`]}
-                      />
-                    </Grid.Row>
-                  ))}
+                  {["Tram", "Metro", "Rail", "Bus", "Ferry", "Cablecar"].map(
+                    mode => (
+                      <Grid.Row>
+                        <Checkbox
+                          toggle
+                          label={`${mode}`}
+                          onChange={() => this._toggleState(`include${mode}`)}
+                          checked={this.state[`include${mode}`]}
+                        />
+                      </Grid.Row>
+                    )
+                  )}
                 </Grid.Column>
               </Grid>
             </Accordion.Content>

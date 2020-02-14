@@ -1,6 +1,14 @@
 """
 construct_jq.py: Construct a jq filter string from defined arguments
 
+Used like:
+Create jq filter string that keeps ScheduleStopPairs that are on Friday,
+whose between origin_departure_time is >=4:00pm and <8:00pm, and that ran on
+Feb 7, 2020
+```
+jq_str="$(python code/schedules/construct_jq.py --day-of-week 4 --start-hour 16 --end-hour 20 --service-date '2020-02-07')"
+```
+
 Each ScheduleStopPair is a JSON record of the following format:
 ```json
 {
