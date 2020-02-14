@@ -312,18 +312,20 @@ for i in {1..5}; do
 done
 ```
 
+TODO: create index
+
+```bash
+# Make xw with route_id: operator_id
+cat data/routes.geojson \
+    | jq -c '{route_id: .properties.onestop_id, operator_id: .properties.operated_by_onestop_id}' \
+    > data/route_operator_xw.json
+```
+
 ```bash
 # Loop over _routes_
 for i in {1..5}; do
-    cat data/routes_onestop_ids_${i}.txt | while read route_id
-    do
-        # Find _a_ route with this route_id from routes.geojson so that I can
-        # get its operator id
-        operator_id=$(cat data/routes.geojson | jq -c "if .properties.onestop_id == \"$route_id\" then .properties.operated_by_onestop_id else empty end" | head -n 1 | tr -d \")
-        echo "Found operator: $operator_id"
-        echo "Running ssp_geom.sh for operator: $operator_id and route: $route_id"
-        bash code/schedules/ssp_geom.sh "$operator_id" "$route_id"
-    done
+    cat data/routes_onestop_ids_${i}.txt \
+        | parallel -P $num_cpu bash code/schedules/ssp_geom.sh {}
 done
 ```
 

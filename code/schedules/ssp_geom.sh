@@ -2,8 +2,12 @@
 
 # Arg 1: operator_id
 function ssp_geom() {
-    operator_id=$1
-    route_id=$2
+    route_id=$1
+
+    # Find this route's operator id
+    operator_id=$(cat data/route_operator_xw.json | jq "if .route_id == \"$route_id\"then .operator_id else empty end" | tr -d \")
+    echo "Found operator: $operator_id"
+    echo "Running ssp_geom.sh for operator: $operator_id and route: $route_id"
 
     # If the "finished" file exists, then skip this operator id
     if [ -f data/ssp_geom/$route_id.finished ]; then
@@ -60,4 +64,4 @@ function ssp_geom() {
 }
 
 # Run as main
-ssp_geom "$1" "$2"
+ssp_geom "$1"
