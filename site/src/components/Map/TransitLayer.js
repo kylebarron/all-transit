@@ -9,9 +9,7 @@ export const interactiveLayerIds = [
   "transit_stops"
 ];
 
-export function TransitLayer(props) {
-  const { highlightedRouteIds, highlightedStopIds, transitModes } = props;
-
+function transitModeFilter(transitModes) {
   // https://stackoverflow.com/a/25095796
   const transitTypes = Object.keys(transitModes).filter(k => transitModes[k]);
   const transitModeFilter = [
@@ -19,6 +17,19 @@ export function TransitLayer(props) {
     ["get", "vehicle_type"],
     ["literal", transitTypes]
   ];
+  return transitModeFilter;
+}
+
+export function TransitLayer(props) {
+  const { highlightedRouteIds, highlightedStopIds, transitModes } = props;
+
+  // Mapbox style spec filter syntax allows you to have "all" and then a list of
+  // filters. So I should be able to just append filters to this list and then
+  // pass the list to the Layers
+  const filters = ["all"]
+
+  // Add transit mode filter
+  filters.push(transitModeFilter(transitModes))
 
   const useRouteHighlighting = !(
     !Array.isArray(highlightedRouteIds) || !highlightedRouteIds.length
@@ -43,7 +54,7 @@ export function TransitLayer(props) {
         beforeId="highway_name_other"
         source-layer="routes"
         type="line"
-        filter={transitModeFilter}
+        filter={filters}
         paint={{
           "line-color": "#000",
           "line-width": {
@@ -69,7 +80,7 @@ export function TransitLayer(props) {
         beforeId="highway_name_other"
         source-layer="routes"
         type="line"
-        filter={transitModeFilter}
+        filter={filters}
         paint={{
           "line-color": "#000",
           "line-width": {
@@ -95,7 +106,7 @@ export function TransitLayer(props) {
         beforeId="highway_name_other"
         source-layer="routes"
         type="line"
-        filter={transitModeFilter}
+        filter={filters}
         paint={{
           "line-color": [
             "case",
@@ -125,7 +136,7 @@ export function TransitLayer(props) {
         beforeId="highway_name_other"
         source-layer="routes"
         type="line"
-        filter={transitModeFilter}
+        filter={filters}
         paint={{
           "line-color": [
             "case",
@@ -184,7 +195,7 @@ export function TransitLayer(props) {
           "all",
           ["!=", ["get", "operated_by_name"], "Amtrak California"],
           ["!=", ["get", "operated_by_name"], "Amtrak Chartered Vehicle"],
-          transitModeFilter
+          filters
         ]}
         layout={{
           "symbol-placement": "line",
