@@ -335,7 +335,7 @@ rm -rf data/ssp_geom_tiles
 mkdir -p data/ssp_geom_tiles
 find data/ssp_geom/ -type f -name '*.geojson' -exec cat {} \; \
     | uniq \
-    | python code/tile_geojson.py \
+    | python code/tile/tile_geojson.py \
             `# Set minimum tile zoom to 12` \
             -z 12 \
             `# Set maximum tile zoom to 12` \
