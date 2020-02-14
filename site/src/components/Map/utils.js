@@ -50,3 +50,20 @@ export function getInitialViewState(location) {
     zoom: zoom
   };
 }
+
+export function timeToStr(time, options = {}) {
+  const { showSeconds = false } = options;
+  const date = new Date(time * 1000);
+  const hours = String(date.getUTCHours()).padStart(2, "0");
+  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+  const seconds = String(date.getUTCSeconds()).padStart(2, "0");
+
+  // Will display time in 10:30:23 format
+  let formattedTime;
+  if (!showSeconds) {
+    formattedTime = hours + ":" + minutes;
+  } else {
+    formattedTime = hours + ":" + minutes + ":" + seconds;
+  }
+  return formattedTime;
+}

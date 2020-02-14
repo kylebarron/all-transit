@@ -6,16 +6,8 @@ import InteractiveMap, {
   _MapContext as MapContext,
   NavigationControl
 } from "react-map-gl";
-import { getInitialViewState } from "./utils";
-import {
-  Container,
-  Accordion,
-  Icon,
-  Menu,
-  Checkbox,
-  Card,
-  Grid
-} from "semantic-ui-react";
+import { getInitialViewState, timeToStr } from "./utils";
+import { Container, Accordion, Checkbox, Card, Grid } from "semantic-ui-react";
 import { TransitLayer, interactiveLayerIds } from "./TransitLayer";
 import { OperatorsList } from "./OperatorsList";
 import { Link } from "gatsby";
@@ -26,23 +18,6 @@ import "../../css/mapbox-gl.css";
 const pickingRadius = 10;
 const minHighlightZoom = 11;
 const minAnimationZoom = 11;
-
-function timeToStr(time, options = {}) {
-  const { showSeconds = false } = options;
-  const date = new Date(time * 1000);
-  const hours = String(date.getUTCHours()).padStart(2, "0");
-  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
-  const seconds = String(date.getUTCSeconds()).padStart(2, "0");
-
-  // Will display time in 10:30:23 format
-  let formattedTime;
-  if (!showSeconds) {
-    formattedTime = hours + ":" + minutes;
-  } else {
-    formattedTime = hours + ":" + minutes + ":" + seconds;
-  }
-  return formattedTime;
-}
 
 class Map extends React.Component {
   state = {
