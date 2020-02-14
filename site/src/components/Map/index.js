@@ -13,9 +13,11 @@ import {
   Icon,
   Menu,
   Checkbox,
+  Card,
   Grid
 } from "semantic-ui-react";
 import { TransitLayer, interactiveLayerIds } from "./TransitLayer";
+import { OperatorsList } from "./OperatorsList";
 
 // You'll get obscure errors without including the Mapbox GL CSS
 import "../../css/mapbox-gl.css";
@@ -49,6 +51,7 @@ class Map extends React.Component {
     highlightedStopsOnestopIds: [],
     highlightedRoutesOnestopIds: [],
     operators: [],
+    operatorsDisabled: {},
     zoom: null,
     includeTram: true,
     includeMetro: true,
@@ -118,6 +121,7 @@ class Map extends React.Component {
       });
     }
 
+    console.log(this.state.operators);
     // You can pass those coordinates to React Map GL's queryRenderedFeatures
     // to query any desired layers rendered there.
     // Make sure you create the ref on InteractiveMap or StaticMap
@@ -237,6 +241,35 @@ class Map extends React.Component {
       time
     } = this.state;
 
+    const operatorsAccordionPanels = [
+      {
+        key: "operators",
+        title: "Operators",
+        content: {
+          content: (
+            <div>
+              <OperatorsList
+                operators={this.state.operators}
+                operatorsDisabled={this.state.operatorsDisabled}
+                onChange={operator_onestop_id => {
+                  this.setState(prevState => {
+                    const { operatorsDisabled } = prevState;
+                    const thisOperatorDisabled =
+                      operatorsDisabled[operator_onestop_id] || false;
+                    operatorsDisabled[
+                      operator_onestop_id
+                    ] = !thisOperatorDisabled;
+
+                    return {operatorsDisabled: operatorsDisabled}
+                  });
+                }}
+              />
+            </div>
+          )
+        }
+      }
+    ];
+
     return (
       <div ref={ref => (this.deckDiv = ref)}>
         <DeckGL
@@ -285,6 +318,7 @@ class Map extends React.Component {
           style={{
             position: "absolute",
             width: 240,
+            maxWidth: 300,
             left: 30,
             top: 30,
             maxHeight: "70%",
@@ -294,55 +328,85 @@ class Map extends React.Component {
             overflowY: "auto"
           }}
         >
-          {zoom >= minAnimationZoom && (
-            <p>Time: Friday {timeToStr(time)}</p>
-          )}
-          <Accordion as={Menu} vertical fluid styled style={{ maxWidth: 240 }}>
-            <Accordion.Title
-              active={this.state.filterBoxExpanded}
-              index={0}
-              onClick={() => this._toggleState("filterBoxExpanded")}
-            >
-              <Icon name="dropdown" />
-              Filters
-            </Accordion.Title>
-            <Accordion.Content active={this.state.filterBoxExpanded}>
-              {zoom < minHighlightZoom ? (
-                <p>Zoom in for more options</p>
-              ) : (
-                <div>
-                  <Checkbox
-                    toggle
-                    label="Highlight routes by stop"
-                    onChange={() => this._toggleState("highlightRoutesByStop")}
-                    checked={this.state.highlightRoutesByStop}
+          <Card>
+            <Card.Content>
+              <Card.Header>All Transit</Card.Header>
+              <Card.Description>
+                {zoom >= minAnimationZoom && (
+                  <p>Time: Friday {timeToStr(time)}</p>
+                )}
+                {zoom >= 10 && (
+                  <Accordion
+                    vertical
+                    fluid
+                    styled
+                    panels={operatorsAccordionPanels}
                   />
-                  {/* <Checkbox
+                )}
+                <Accordion
+                  as={Menu}
+                  vertical
+                  fluid
+                  styled
+                  // style={{ maxWidth: 240 }}
+                >
+                  <Accordion.Title
+                    active={this.state.filterBoxExpanded}
+                    index={0}
+                    onClick={() => this._toggleState("filterBoxExpanded")}
+                  >
+                    <Icon name="dropdown" />
+                    Filters
+                  </Accordion.Title>
+                  <Accordion.Content active={this.state.filterBoxExpanded}>
+                    {zoom < minHighlightZoom ? (
+                      <p>Zoom in for more options</p>
+                    ) : (
+                      <div>
+                        <Checkbox
+                          toggle
+                          label="Highlight routes by stop"
+                          onChange={() =>
+                            this._toggleState("highlightRoutesByStop")
+                          }
+                          checked={this.state.highlightRoutesByStop}
+                        />
+                        {/* <Checkbox
                     toggle
                     label="Highlight stops by route"
                     onChange={() => this._toggleState("highlightStopsByRoute")}
                     checked={this.state.highlightStopsByRoute}
                   /> */}
-                </div>
-              )}
-              <Grid columns={1} relaxed>
-                <Grid.Column>
-                  {["Tram", "Metro", "Rail", "Bus", "Ferry", "Cablecar"].map(
-                    mode => (
-                      <Grid.Row>
-                        <Checkbox
-                          toggle
-                          label={`${mode}`}
-                          onChange={() => this._toggleState(`include${mode}`)}
-                          checked={this.state[`include${mode}`]}
-                        />
-                      </Grid.Row>
-                    )
-                  )}
-                </Grid.Column>
-              </Grid>
-            </Accordion.Content>
-          </Accordion>
+                      </div>
+                    )}
+                    <Grid columns={1} relaxed>
+                      <Grid.Column>
+                        {[
+                          "Tram",
+                          "Metro",
+                          "Rail",
+                          "Bus",
+                          "Ferry",
+                          "Cablecar"
+                        ].map(mode => (
+                          <Grid.Row>
+                            <Checkbox
+                              toggle
+                              label={`${mode}`}
+                              onChange={() =>
+                                this._toggleState(`include${mode}`)
+                              }
+                              checked={this.state[`include${mode}`]}
+                            />
+                          </Grid.Row>
+                        ))}
+                      </Grid.Column>
+                    </Grid>
+                  </Accordion.Content>
+                </Accordion>
+              </Card.Description>
+            </Card.Content>
+          </Card>
         </Container>
       </div>
     );
