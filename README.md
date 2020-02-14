@@ -18,8 +18,8 @@ React Map GL/Mapbox GL JS.
 ## Data
 
 Most of the data-generating code for this project is done in Bash,
-[`jq`](https://stedolan.github.io/jq/), GNU Parallel, and a couple Python
-scripts. Data is kept in _newline-delimited JSON_ and _newline-delimited
+[`jq`](https://stedolan.github.io/jq/), GNU Parallel, SQLite, and a couple
+Python scripts. Data is kept in _newline-delimited JSON_ and _newline-delimited
 GeoJSON_ for all intermediate steps to facilitate streaming and keep memory use
 low.
 
@@ -247,9 +247,72 @@ tile-join \
     stops.mbtiles operators.mbtiles routes.mbtiles
 ```
 
+Then publish! Host on a small server with
+[`mbtileserver`](https://github.com/consbio/mbtileserver) or export the
+`mbtiles` to a directory of individual tiles with
+[`mb-util`](https://github.com/mapbox/mbutil) and upload the individual files to
+S3.
+
 ### Schedules
 
-Try to import `ScheduleStopPair` data into sqlite.
+The schedule component is my favorite part of the project. You can see dots
+moving around that correspond to transit vehicles: trains, buses, ferries. This
+data is _not simulated_, it takes actual schedule information from the
+Transitland API and matches it to route geometries.
+
+I use the deck.gl
+[`TripsLayer`](https://deck.gl/#/documentation/deckgl-api-reference/layers/trips-layer)
+to render the schedule data as an animation. That means that I need to figure
+out the best way to transport three-dimensional `LineStrings` (where the third
+dimension refers to time) to the client. Unfortunately, at this time Tippecanoe
+[doesn't support three-dimensional
+coordinates](https://github.com/mapbox/tippecanoe/issues/714). The
+recommendation in that thread was to reformat to have individual points with
+properties. That would make it harder to associate the points to lines, however.
+I eventually decided it was best to pack the data into tiled
+gzipped-minified-GeoJSON. And since I know that all features are `LineStrings`,
+and since I have no properties that I care about, I take only the coordinates,
+so that the data the client receives is like:
+
+```json
+[
+    [
+        [
+            0, 1, 2
+        ],
+        [
+            1, 2, 3
+        ]
+    ],
+    [
+        []
+        ...
+    ]
+]
+```
+
+I currently store the third coordinate as seconds of the day. So that 4pm is `16
+* 60 * 60 = 57000`.
+
+In order to make the data download manageable, I cut each GeoJSON into xyz map
+tiles, so that only data pertaining to the current viewport is loaded. For dense
+cities like Washington DC and New York City, some of the LineStrings are very
+dense, so I cut the schedule tiles into full resolution at zoom 13, and then
+generate overview tiles for lower zooms that contain a fraction of the features
+of their child tiles.
+
+I generated tiles in this manner down to zoom 2, but discovered that performance
+was very poor on lower-powered devices like my phone. Because of that, I think
+it's best to have the schedule feature disabled by default.
+
+#### Data Processing
+
+I originally tried to do everything with `jq`, but the schedule data for all
+routes in the US as uncompressed JSON is >100GB and things were too slow. I
+tried SQLite and it's pretty amazing.
+
+To import `ScheduleStopPair` data into SQLite, I first converted the JSON files
+to CSV:
 ```bash
 # Create CSV file with data
 mkdir -p data/ssp_sqlite/
@@ -268,7 +331,7 @@ for i in {1..5}; do
 done
 ```
 
-Import CSV into sqlite3 db
+Then import the CSV files into SQLite:
 ```bash
 for i in {1..5}; do
     gunzip -c data/ssp_sqlite/ssp${i}.csv.gz \
@@ -282,6 +345,10 @@ sqlite3 data/ssp_sqlite/ssp.db \
     'CREATE INDEX route_onestop_id_idx ON ssp(route_onestop_id);'
 ```
 
+I found it best to loop over `route_id`s when matching schedules to route
+geometries. Here I create a crosswalk with the operator id for each route, so
+that I can pass to my Python script 1) `ScheduleStopPair`s pertaining to a
+route, 2) `Stops` by operator and 3) `Routes` by operator.
 ```bash
 # Make xw with route_id: operator_id
 cat data/routes.geojson \
@@ -289,25 +356,47 @@ cat data/routes.geojson \
     > data/route_operator_xw.json
 ```
 
+Here's the meat of connecting schedules to route geometries. The bash script calls `code/schedules/ssp_geom.py`, and the general process of that script is:
+
+1. Load stops and routes for the operator in dictionaries
+2. Load provided `ScheduleStopPair`s from stdin
+3. Iterate over every `ScheduleStopPair`, call this `ssp`:
+    1. Find the starting and ending stops of the `ssp`, and record their `Point` geometries.
+    2. Find the route the `ssp` corresponds to and record its geometry.
+    3. For the starting and ending stops, find the closest point on the route.
+        Sometimes the route will actually be a `MultiLineString`, in which case
+        I try to keep the `LineString` that's closest to both the starting and
+        ending stops.
+    4. Now that I have a single `LineString`, split it by the starting and
+        ending stops, so that I have only the part of the route between those
+        two stops.
+    5. Get the time at which the vehicle leaves the start stop and at which it
+        arrives at the destination stop. Then linearly interpolate this along
+        every coordinate of the `LineString`. This way, the finalized
+        `LineString`s have the same geometry as the original routes, and every
+        coordinate has a time.
+
 ```bash
 # Loop over _routes_
+num_cpu=15
 for i in {1..5}; do
     cat data/routes_onestop_ids_${i}.txt \
         | parallel -P $num_cpu bash code/schedules/ssp_geom.sh {}
 done
 ```
 
-Then cut these into tiles:
+Now in `data/ssp_geom` I have a newline-delimited GeoJSON file for every route.
+I take all these individual features and cut them into individual tiles for a
+zoom that has all the original data with no simplification, which I currently
+have as zoom 13.
 ```bash
 rm -rf data/ssp_geom_tiles
 mkdir -p data/ssp_geom_tiles
-find data/ssp_geom/ -type f -name '*.geojson' -exec cat {} \; \
+find data/ssp_geom/ -type f -name 'r-*.geojson' -exec cat {} \; \
     | uniq \
     | python code/tile/tile_geojson.py \
-            `# Set minimum tile zoom to 12` \
-            -z 12 \
-            `# Set maximum tile zoom to 12` \
-            -Z 12 \
+            `# Set minimum and maximum tile zooms` \
+            -z 13 -Z 13 \
             `# Only keep LineStrings` \
             --allowed-geom-type 'LineString' \
             `# Write tiles into the following root dir` \
@@ -318,9 +407,9 @@ Create overview tiles for lower zooms
 ```bash
 python code/tile/create_overview_tiles.py \
     --min-zoom 2 \
-    --existing-zoom 12 \
+    --existing-zoom 13 \
     --tile-dir data/ssp_geom_tiles \
-    --max-coords 200000
+    --max-coords 150000
 ```
 
 Then compress these tiles
