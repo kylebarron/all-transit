@@ -44,7 +44,12 @@ def main(stops_path, routes_path, properties_keys, ssp_lines):
     ag = ScheduleStopPairGeometry(
         stops_path=stops_path, routes_path=routes_path)
 
-    header_line = next(ssp_lines).strip()
+    try:
+        header_line = next(ssp_lines).strip()
+        next(iter([]))
+    except StopIteration:
+        print('no data received. Exiting', file=sys.stderr)
+
     headers = header_line.split('|')
     for line in ssp_lines:
         # Parse JSON as dict
