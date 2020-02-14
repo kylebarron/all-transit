@@ -29,4 +29,4 @@ const IndexPage = (props: LayoutProps) => (
   </div>
 );
 
-export default withLayout(IndexPage);
+export default IndexPage;
