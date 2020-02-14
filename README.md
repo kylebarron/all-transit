@@ -279,12 +279,6 @@ tile-join \
 
 ### Schedules
 
-NOTE: Figure out a way to select by ssp id?? I.e. you're matching _StopPairs_ to
-geometries, and then saving those geometries, and then ideally later when you
-have many different _ScheduleStopPairs_ corresponding to those _StopPairs_ you
-should be able to loop over them quickly instead of having to match the
-_ScheduleStopPair_ to a geometry every time.
-
 Try to import `ScheduleStopPair` data into sqlite.
 ```bash
 # Create CSV file with data
