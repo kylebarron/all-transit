@@ -46,9 +46,9 @@ def main(stops_path, routes_path, properties_keys, ssp_lines):
 
     try:
         header_line = next(ssp_lines).strip()
-        return
     except StopIteration:
         print('no data received. Exiting', file=sys.stderr)
+        return
 
     headers = header_line.split('|')
     for line in ssp_lines:
