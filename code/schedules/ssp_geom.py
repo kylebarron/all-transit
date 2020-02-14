@@ -88,12 +88,12 @@ class ScheduleStopPairGeometry:
 
         if orig_stop is None:
             print(
-                f'orig_stop not correctly loaded into self.stops',
+                f'orig_stop not correctly loaded into self.stops for id: {orig_id}',
                 file=sys.stderr)
             return None
         if dest_stop is None:
             print(
-                f'dest_stop not correctly loaded into self.stops',
+                f'dest_stop not correctly loaded into self.stops for id: {dest_id}',
                 file=sys.stderr)
             return None
 
