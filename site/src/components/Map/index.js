@@ -36,7 +36,7 @@ class Map extends React.Component {
     showRouteLabels: false,
     operators: [],
     operatorsDisabled: {},
-    zoom: null,
+    zoom: getInitialViewState(this.props.location).zoom || null,
     includeTram: true,
     includeMetro: true,
     includeRail: true,
