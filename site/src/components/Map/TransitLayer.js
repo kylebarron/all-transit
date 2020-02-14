@@ -30,6 +30,14 @@ export function TransitLayer(props) {
       type="vector"
       url="https://mbtiles.nst.guide/services/all-transit/all"
     >
+      <Layer 
+        id="transit_operators"
+        source-layer="operators"
+        type="fill"
+        paint={{
+          "fill-opacity": 0
+        }}
+      />
       <Layer
         id="transit_routes_casing_default"
         beforeId="highway_name_other"

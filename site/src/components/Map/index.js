@@ -48,6 +48,7 @@ class Map extends React.Component {
     highlightRoutesByStop: false,
     highlightedStopsOnestopIds: [],
     highlightedRoutesOnestopIds: [],
+    operators: [],
     zoom: null,
     includeTram: true,
     includeMetro: true,
@@ -103,8 +104,6 @@ class Map extends React.Component {
 
   // Called on click by deck.gl
   // event.x, event.y are the clicked x and y coordinates in pixels
-  // If the deck.gl picking engine finds something, the `object` , `color` and
-  // `layer` attributes will be non-null
   _updatePicked = event => {
     const { x, y } = event;
     const { highlightRoutesByStop, highlightStopsByRoute, zoom } = this.state;
@@ -178,6 +177,13 @@ class Map extends React.Component {
   onViewStateChange = ({ viewState }) => {
     const { zoom } = viewState;
     const newState = { zoom: zoom };
+
+    // Get operators in view
+    const operatorFeatures = this.map.queryRenderedFeatures({
+      layers: ["transit_operators"]
+    });
+    const operators = operatorFeatures.map(feature => feature.properties);
+    newState["operators"] = operators;
 
     // Reset highlighted objects when zooming out past minHighlightZoom
     if (zoom < minHighlightZoom) {
