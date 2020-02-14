@@ -209,36 +209,6 @@ for i in {1..5}; do
 done
 ```
 
-It probably would've been better to save `ScheduleStopPair`s in the above step
-by `Route` identifier and not concatenating them all together. Alas. Since
-`Stops` and `Routes` are saved by operator, I extract `ScheduleStopPairs` into
-operator files as well, and then use them separately for the code later that
-assigns geometries to `ScheduleStopPair`s.
-
-First, find operator identifiers that exist in each fifth of the
-`ScheduleStopPair`s, then loop over those to separate `ScheduleStopPair`s into
-files by operator.
-```bash
-# Find operators that exist in each fifth of the ScheduleStopPairs files
-for i in {1..5}; do
-    gunzip -c data/ssp/ssp${i}.json.gz \
-        | jq -c '.operator_onestop_id' \
-        | uniq \
-        | tr -d \" \
-        > data/ssp/ssp${i}_operators.txt
-done
-
-# Sort into different files by operator
-num_cpu=15
-for i in {1..5}; do
-    mkdir -p data/ssp_by_operator_id_${i}
-    # I think the {} means "send all stdin arguments to the function"
-    # So `{} $i` should send operator_id, i to sort_ssp_by_operator.sh
-    cat data/ssp/ssp${i}_operators.txt \
-        | parallel -P $num_cpu bash code/sort_ssp_by_operator.sh {} $i
-done
-```
-
 ### Vector tiles for Operators, Routes, Stops
 
 I generate vector tiles for the routes, operators, and stops. I have `jq`
