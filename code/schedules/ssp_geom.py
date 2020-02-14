@@ -83,8 +83,20 @@ class ScheduleStopPairGeometry:
         """
         orig_id = ssp['origin_onestop_id']
         dest_id = ssp['destination_onestop_id']
-        orig_stop = self.stops[orig_id]
-        dest_stop = self.stops[dest_id]
+        orig_stop = self.stops.get(orig_id)
+        dest_stop = self.stops.get(dest_id)
+
+        if orig_stop is None:
+            print(
+                f'orig_stop not correctly loaded into self.stops',
+                file=sys.stderr)
+            return None
+        if dest_stop is None:
+            print(
+                f'dest_stop not correctly loaded into self.stops',
+                file=sys.stderr)
+            return None
+
         orig_stop_geom = asShape(orig_stop['geometry'])
         dest_stop_geom = asShape(dest_stop['geometry'])
 
