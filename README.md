@@ -346,6 +346,15 @@ find data/ssp_geom/ -type f -name '*.geojson' -exec cat {} \; \
             -d data/ssp_geom_tiles
 ```
 
+Create overview tiles for lower zooms
+```bash
+python code/tile/create_overview_tiles.py \
+    --min-zoom 2 \
+    --existing-zoom 12 \
+    --tile-dir data/ssp_geom_tiles \
+    --max-coords 200000
+```
+
 Then compress these tiles
 ```bash
 rm -rf data/ssp_geom_tiles_comp
