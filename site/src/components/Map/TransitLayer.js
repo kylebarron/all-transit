@@ -20,16 +20,49 @@ function transitModeFilter(transitModes) {
   return transitModeFilter;
 }
 
+function operatorsFilter(operatorsDisabled) {
+  const disabled_operator_ids = [];
+  for (const operator_id of Object.keys(operatorsDisabled)) {
+    const disabled = operatorsDisabled[operator_id];
+    if (disabled) {
+      disabled_operator_ids.push(operator_id);
+    }
+  }
+
+  // NOTE! ["get", variable_name] is necessary!!!
+  // If you don't add ["get"] it won't try to access the name from the vector
+  // tile
+  const filter = [
+    "!",
+    [
+      "in",
+      ["get", "operated_by_onestop_id"],
+      ["literal", disabled_operator_ids]
+    ]
+  ];
+  return filter;
+}
+
 export function TransitLayer(props) {
-  const { highlightedRouteIds, highlightedStopIds, transitModes } = props;
+  const {
+    highlightedRouteIds,
+    highlightedStopIds,
+    transitModes,
+    operatorsDisabled
+  } = props;
 
   // Mapbox style spec filter syntax allows you to have "all" and then a list of
   // filters. So I should be able to just append filters to this list and then
   // pass the list to the Layers
-  const filters = ["all"]
+  // Note that this is specifically the filter passed to the layers that use the
+  // "routes" source-layer
+  const routesFilter = ["all"];
 
   // Add transit mode filter
-  filters.push(transitModeFilter(transitModes))
+  routesFilter.push(transitModeFilter(transitModes));
+
+  // Add operators filter
+  routesFilter.push(operatorsFilter(operatorsDisabled));
 
   const useRouteHighlighting = !(
     !Array.isArray(highlightedRouteIds) || !highlightedRouteIds.length
@@ -41,7 +74,7 @@ export function TransitLayer(props) {
       type="vector"
       url="https://mbtiles.nst.guide/services/all-transit/all"
     >
-      <Layer 
+      <Layer
         id="transit_operators"
         source-layer="operators"
         type="fill"
@@ -54,7 +87,7 @@ export function TransitLayer(props) {
         beforeId="highway_name_other"
         source-layer="routes"
         type="line"
-        filter={filters}
+        filter={routesFilter}
         paint={{
           "line-color": "#000",
           "line-width": {
@@ -80,7 +113,7 @@ export function TransitLayer(props) {
         beforeId="highway_name_other"
         source-layer="routes"
         type="line"
-        filter={filters}
+        filter={routesFilter}
         paint={{
           "line-color": "#000",
           "line-width": {
@@ -106,7 +139,7 @@ export function TransitLayer(props) {
         beforeId="highway_name_other"
         source-layer="routes"
         type="line"
-        filter={filters}
+        filter={routesFilter}
         paint={{
           "line-color": [
             "case",
@@ -136,7 +169,7 @@ export function TransitLayer(props) {
         beforeId="highway_name_other"
         source-layer="routes"
         type="line"
-        filter={filters}
+        filter={routesFilter}
         paint={{
           "line-color": [
             "case",
@@ -191,12 +224,7 @@ export function TransitLayer(props) {
         id="transit_routes_label"
         source-layer="routes"
         type="symbol"
-        filter={[
-          "all",
-          ["!=", ["get", "operated_by_name"], "Amtrak California"],
-          ["!=", ["get", "operated_by_name"], "Amtrak Chartered Vehicle"],
-          filters
-        ]}
+        filter={routesFilter}
         layout={{
           "symbol-placement": "line",
           "text-anchor": "center",

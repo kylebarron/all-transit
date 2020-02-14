@@ -297,6 +297,7 @@ class Map extends React.Component {
             <TransitLayer
               highlightedRouteIds={highlightedRoutesOnestopIds}
               highlightedStopIds={highlightedStopsOnestopIds}
+              operatorsDisabled={this.state.operatorsDisabled}
               transitModes={{
                 tram: this.state.includeTram,
                 metro: this.state.includeMetro,
