@@ -140,6 +140,8 @@ def load_features(tile, tile_dir):
 
 def write_geojson(features, tile, tile_dir):
     path = tile_path(tile, tile_dir)
+    # Make directory if it doesn't exist
+    path.parents[0].mkdir(exist_ok=True, parents=True)
     with open(path, 'w') as f:
         for feature in features:
             f.write(geojson.dumps(feature, separators=(',', ':')))
