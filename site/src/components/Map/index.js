@@ -50,6 +50,7 @@ class Map extends React.Component {
     highlightRoutesByStop: false,
     highlightedStopsOnestopIds: [],
     highlightedRoutesOnestopIds: [],
+    showRouteLabels: false,
     operators: [],
     operatorsDisabled: {},
     zoom: null,
@@ -305,25 +306,39 @@ class Map extends React.Component {
         key: "otherOptions",
         title: "Other Options",
         content: {
-          content:
-            zoom < minHighlightZoom ? (
-              <p>Zoom in to highlight routes on hover</p>
-            ) : (
-              <div>
+          content: (
+            <div>
+              {zoom < minHighlightZoom ? (
                 <Checkbox
                   toggle
-                  label="Highlight routes by stop"
-                  onChange={() => this._toggleState("highlightRoutesByStop")}
+                  disabled
+                  label="Zoom in to highlight routes on hover"
                   checked={this.state.highlightRoutesByStop}
                 />
-                {/* <Checkbox
+              ) : (
+                <div>
+                  <Checkbox
+                    toggle
+                    label="Highlight routes by stop"
+                    onChange={() => this._toggleState("highlightRoutesByStop")}
+                    checked={this.state.highlightRoutesByStop}
+                  />
+                  {/* <Checkbox
                     toggle
                     label="Highlight stops by route"
                     onChange={() => this._toggleState("highlightStopsByRoute")}
                     checked={this.state.highlightStopsByRoute}
                   /> */}
-              </div>
-            )
+                </div>
+              )}
+              <Checkbox
+                toggle
+                label="Show route labels"
+                onChange={() => this._toggleState("showRouteLabels")}
+                checked={this.state.showRouteLabels}
+              />
+            </div>
+          )
         }
       }
     ];
@@ -356,6 +371,7 @@ class Map extends React.Component {
               highlightedRouteIds={highlightedRoutesOnestopIds}
               highlightedStopIds={highlightedStopsOnestopIds}
               operatorsDisabled={this.state.operatorsDisabled}
+              showRouteLabels={this.state.showRouteLabels}
               transitModes={{
                 tram: this.state.includeTram,
                 metro: this.state.includeMetro,

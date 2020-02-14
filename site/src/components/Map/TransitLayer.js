@@ -48,7 +48,8 @@ export function TransitLayer(props) {
     highlightedRouteIds,
     highlightedStopIds,
     transitModes,
-    operatorsDisabled
+    operatorsDisabled,
+    showRouteLabels
   } = props;
 
   // Mapbox style spec filter syntax allows you to have "all" and then a list of
@@ -241,7 +242,8 @@ export function TransitLayer(props) {
           "symbol-spacing": 350,
           "text-max-angle": 50,
           "text-letter-spacing": 0,
-          "text-max-width": 15
+          "text-max-width": 15,
+          visibility: showRouteLabels ? "visible" : "none"
         }}
         paint={{
           "text-color": "rgba(255, 255, 255, 1)",
