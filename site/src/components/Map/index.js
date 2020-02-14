@@ -18,6 +18,7 @@ import {
 } from "semantic-ui-react";
 import { TransitLayer, interactiveLayerIds } from "./TransitLayer";
 import { OperatorsList } from "./OperatorsList";
+import { Link } from "gatsby";
 
 // You'll get obscure errors without including the Mapbox GL CSS
 import "../../css/mapbox-gl.css";
@@ -389,6 +390,11 @@ class Map extends React.Component {
           <Card>
             <Card.Content>
               <Card.Header textAlign="center">All Transit</Card.Header>
+              <Card.Meta textAlign="center">
+                <Link as={Link} to="/about/">
+                  About
+                </Link>
+              </Card.Meta>
               <Card.Description>
                 <Accordion fluid styled panels={optionsPanels} />
               </Card.Description>
