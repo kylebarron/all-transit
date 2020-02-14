@@ -416,19 +416,10 @@ Then compress these tiles
 ```bash
 rm -rf data/ssp_geom_tiles_comp
 mkdir -p data/ssp_geom_tiles_comp
-for file in data/ssp_geom_tiles/**/*.geojson; do
-    z="$(echo $file | awk -F'/' '{print $(NF-2)}')"
-    x="$(echo $file | awk -F'/' '{print $(NF-1)}')"
-    y="$(basename $file .geojson)"
-    mkdir -p data/ssp_geom_tiles_comp/$z/$x
-    # Take only the coordinates, minified, and gzip them
-    cat $file \
-    `# Take only the coordinates of each GeoJSON record` \
-    | jq -c '.geometry.coordinates' \
-    `# Convert JSONlines to JSON` \
-    | jq -cs '.' \
-    | gzip > data/ssp_geom_tiles_comp/$z/$x/$y.json
-done
+num_cpu=15
+# Compress tiles and write to data/ssp_geom_tiles_comp
+# This passes 2, 3, ... 13 to code/tile/compress_tiles.sh
+parallel -P $num_cpu bash code/tile/compress_tiles.sh ::: {2..13}
 ```
 
 Upload to AWS
