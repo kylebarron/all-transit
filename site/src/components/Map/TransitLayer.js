@@ -48,7 +48,7 @@ export function TransitLayer(props) {
           "line-opacity": {
             stops: [
               [4, 0.3],
-              [14, 0.7]
+              [14, 0.4]
             ]
           }
         }}
@@ -67,7 +67,7 @@ export function TransitLayer(props) {
           "line-width": {
             stops: [
               [5, 0.3],
-              [15, 0.7]
+              [15, 0.4]
             ]
           },
           "line-gap-width": 1,
@@ -104,7 +104,7 @@ export function TransitLayer(props) {
           "line-opacity": {
             stops: [
               [4, 0.3],
-              [14, 0.7]
+              [14, 0.4]
             ]
           }
         }}
@@ -153,7 +153,7 @@ export function TransitLayer(props) {
           "circle-opacity": {
             stops: [
               [11, 0.4],
-              [15, 0.6]
+              [15, 0.5]
             ]
           },
           "circle-radius": {
