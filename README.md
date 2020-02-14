@@ -312,7 +312,11 @@ for i in {1..5}; do
 done
 ```
 
-TODO: create index
+Create SQLite index on `route_id`
+```bash
+sqlite3 data/ssp_sqlite/ssp.db \
+    'CREATE INDEX route_onestop_id_idx ON ssp(route_onestop_id);'
+```
 
 ```bash
 # Make xw with route_id: operator_id
