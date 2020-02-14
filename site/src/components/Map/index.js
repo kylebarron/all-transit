@@ -45,7 +45,6 @@ function timeToStr(time, options = {}) {
 
 class Map extends React.Component {
   state = {
-    filterBoxExpanded: null,
     highlightStopsByRoute: false,
     highlightRoutesByStop: false,
     highlightedStopsOnestopIds: [],
@@ -241,7 +240,16 @@ class Map extends React.Component {
       time
     } = this.state;
 
-    const operatorsAccordionPanels = [
+    const optionsPanels = [
+      {
+        key: "scheduleAnimation",
+        title: "Schedule Animation",
+        content: {
+          content: zoom >= minAnimationZoom && (
+            <p>Time: Friday {timeToStr(time)}</p>
+          )
+        }
+      },
       {
         key: "operators",
         title: "Operators",
@@ -267,10 +275,7 @@ class Map extends React.Component {
             </div>
           )
         }
-      }
-    ];
-
-    const transitModeAccordionPanels = [
+      },
       {
         key: "transitMode",
         title: "Transit Modes",
@@ -293,6 +298,31 @@ class Map extends React.Component {
               </Grid.Column>
             </Grid>
           )
+        }
+      },
+      {
+        key: "otherOptions",
+        title: "Other Options",
+        content: {
+          content:
+            zoom < minHighlightZoom ? (
+              <p>Zoom in to highlight routes on hover</p>
+            ) : (
+              <div>
+                <Checkbox
+                  toggle
+                  label="Highlight routes by stop"
+                  onChange={() => this._toggleState("highlightRoutesByStop")}
+                  checked={this.state.highlightRoutesByStop}
+                />
+                {/* <Checkbox
+                    toggle
+                    label="Highlight stops by route"
+                    onChange={() => this._toggleState("highlightStopsByRoute")}
+                    checked={this.state.highlightStopsByRoute}
+                  /> */}
+              </div>
+            )
         }
       }
     ];
@@ -358,52 +388,9 @@ class Map extends React.Component {
         >
           <Card>
             <Card.Content>
-              <Card.Header>All Transit</Card.Header>
+              <Card.Header textAlign="center">All Transit</Card.Header>
               <Card.Description>
-                {zoom >= minAnimationZoom && (
-                  <p>Time: Friday {timeToStr(time)}</p>
-                )}
-                {zoom >= 10 && (
-                  <Accordion fluid styled panels={operatorsAccordionPanels} />
-                )}
-                <Accordion fluid styled panels={transitModeAccordionPanels} />
-                <Accordion
-                  as={Menu}
-                  fluid
-                  styled
-                  // style={{ maxWidth: 240 }}
-                >
-                  <Accordion.Title
-                    active={this.state.filterBoxExpanded}
-                    index={0}
-                    onClick={() => this._toggleState("filterBoxExpanded")}
-                  >
-                    <Icon name="dropdown" />
-                    Filters
-                  </Accordion.Title>
-                  <Accordion.Content active={this.state.filterBoxExpanded}>
-                    {zoom < minHighlightZoom ? (
-                      <p>Zoom in for more options</p>
-                    ) : (
-                      <div>
-                        <Checkbox
-                          toggle
-                          label="Highlight routes by stop"
-                          onChange={() =>
-                            this._toggleState("highlightRoutesByStop")
-                          }
-                          checked={this.state.highlightRoutesByStop}
-                        />
-                        {/* <Checkbox
-                    toggle
-                    label="Highlight stops by route"
-                    onChange={() => this._toggleState("highlightStopsByRoute")}
-                    checked={this.state.highlightStopsByRoute}
-                  /> */}
-                      </div>
-                    )}
-                  </Accordion.Content>
-                </Accordion>
+                <Accordion fluid styled panels={optionsPanels} />
               </Card.Description>
             </Card.Content>
           </Card>
