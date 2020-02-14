@@ -58,8 +58,6 @@ class Map extends React.Component {
     time: 65391
   };
 
-  // TODO: start and stop animations when zooming below or above
-  // minAnimationZoom
   componentDidMount() {
     this._animate();
   }
