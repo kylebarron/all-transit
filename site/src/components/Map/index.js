@@ -291,7 +291,7 @@ class Map extends React.Component {
           }}
         >
           {zoom >= minAnimationZoom && (
-            <p>Time: Friday {timeToStr(this.state.time)}</p>
+            <p>Time: Friday {timeToStr(time)}</p>
           )}
           <Accordion as={Menu} vertical fluid styled style={{ maxWidth: 240 }}>
             <Accordion.Title
