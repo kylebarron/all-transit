@@ -55,9 +55,9 @@ function ssp_geom() {
             > data/ssp_geom/$route_id.geojson
 
     # Declare that this operator id finished running
-    echo "Finished running for route: $route_id"
-    touch data/ssp_geom/$route_id.finished
+    echo "Finished running for route: ${route_id}"
+    touch data/ssp_geom/${route_id}.finished
 }
 
 # Run as main
-ssp_geom "$1"
+ssp_geom "$1" "$2"

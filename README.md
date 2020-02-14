@@ -319,7 +319,9 @@ for i in {1..5}; do
     do
         # Find _a_ route with this route_id from routes.geojson so that I can
         # get its operator id
-        operator_id=$(cat routes.geojson | jq -c "if .properties.onestop_id == \"$route_id\" then .properties.operated_by_onestop_id else empty end" | head -n 1 | tr -d \")
+        operator_id=$(cat data/routes.geojson | jq -c "if .properties.onestop_id == \"$route_id\" then .properties.operated_by_onestop_id else empty end" | head -n 1 | tr -d \")
+        echo "Found operator: $operator_id"
+        echo "Running ssp_geom.sh for operator: $operator_id and route: $route_id"
         bash code/schedules/ssp_geom.sh "$operator_id" "$route_id"
     done
 done
