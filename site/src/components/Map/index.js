@@ -212,10 +212,10 @@ class Map extends React.Component {
             getPath: d => d.map(p => p.slice(0, 2)),
             getTimestamps: d => d.map(p => p.slice(2)),
             getColor: [253, 128, 93],
-            opacity: 0.5,
+            opacity: 0.6,
             widthMinPixels: 2,
             rounded: true,
-            trailLength: 100,
+            trailLength: 60,
             currentTime: props.currentTime,
             shadowEnabled: false
           });
