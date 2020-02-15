@@ -2,7 +2,8 @@ import * as React from "react";
 import DeckGL from "@deck.gl/react";
 import { MapController } from "deck.gl";
 import { TileLayer, TripsLayer } from "@deck.gl/geo-layers";
-import InteractiveMap, {
+import {
+  StaticMap,
   _MapContext as MapContext,
   NavigationControl
 } from "react-map-gl";
@@ -105,7 +106,6 @@ class Map extends React.Component {
       });
     }
 
-    console.log(this.state.operators);
     // You can pass those coordinates to React Map GL's queryRenderedFeatures
     // to query any desired layers rendered there.
     // Make sure you create the ref on InteractiveMap or StaticMap
@@ -343,7 +343,7 @@ class Map extends React.Component {
           pickingRadius={pickingRadius}
           onViewStateChange={this.onViewStateChange}
         >
-          <InteractiveMap
+          <StaticMap
             ref={ref => {
               this.map = ref && ref.getMap();
             }}
@@ -364,10 +364,10 @@ class Map extends React.Component {
                 cablecar: this.state.includeCablecar
               }}
             />
-          </InteractiveMap>
+          </StaticMap>
 
           {/* NavigationControl needs to be _outside_ InteractiveMap */}
-          <div style={{ position: "absolute", right: 30, top: 30, zIndex: 1 }}>
+          <div style={{ position: "absolute", right: 10, top: 10, zIndex: 1 }}>
             <NavigationControl />
           </div>
         </DeckGL>
