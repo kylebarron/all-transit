@@ -189,7 +189,7 @@ class Map extends React.Component {
     return [
       new TileLayer({
         minZoom: minAnimationZoom,
-        maxZoom: 12,
+        maxZoom: 13,
         visible: this.state.enableScheduleAnimation,
         getTileData: ({ x, y, z }) =>
           fetch(`${baseurl}/${z}/${x}/${y}.json`).then(response =>
@@ -207,10 +207,10 @@ class Map extends React.Component {
             getPath: d => d.map(p => p.slice(0, 2)),
             getTimestamps: d => d.map(p => p.slice(2)),
             getColor: [253, 128, 93],
-            opacity: 0.6,
-            widthMinPixels: 2,
+            opacity: 0.7,
+            widthMinPixels: 3,
             rounded: true,
-            trailLength: 60,
+            trailLength: 50,
             currentTime: props.currentTime,
             shadowEnabled: false
           });
