@@ -25,7 +25,7 @@ import "../../css/mapbox-gl.css";
 
 const pickingRadius = 10;
 const minHighlightZoom = 11;
-const minAnimationZoom = 11;
+const minScheduleAnimationZoom = 11;
 const minOperatorInfoZoom = 9;
 
 class Map extends React.Component {
@@ -190,7 +190,7 @@ class Map extends React.Component {
 
     return [
       new TileLayer({
-        minZoom: minAnimationZoom,
+        minZoom: minScheduleAnimationZoom,
         maxZoom: 13,
         visible: this.state.enableScheduleAnimation,
         getTileData: ({ x, y, z }) =>
@@ -235,7 +235,8 @@ class Map extends React.Component {
         key: "scheduleAnimation",
         title: "Schedule Animation",
         content: {
-          content: zoom >= minAnimationZoom && (
+          content:
+            zoom >= minScheduleAnimationZoom ? (
             <div>
               <Checkbox
                 label="Enable Animation"
@@ -244,6 +245,8 @@ class Map extends React.Component {
               />
             <p>Time: Friday {timeToStr(time)}</p>
             </div>
+            ) : (
+              <p>Zoom in to see schedule animation</p>
           )
         }
       },
