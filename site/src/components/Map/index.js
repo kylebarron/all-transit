@@ -1,6 +1,5 @@
 import * as React from "react";
 import DeckGL from "@deck.gl/react";
-import { MapController } from "deck.gl";
 import { TileLayer, TripsLayer } from "@deck.gl/geo-layers";
 import {
   StaticMap,
@@ -27,6 +26,7 @@ import "../../css/mapbox-gl.css";
 const pickingRadius = 10;
 const minHighlightZoom = 11;
 const minAnimationZoom = 11;
+const minOperatorInfoZoom = 9;
 
 class Map extends React.Component {
   state = {
@@ -169,11 +169,13 @@ class Map extends React.Component {
     const newState = { zoom: zoom };
 
     // Get operators in view
+    if (zoom >= minOperatorInfoZoom) {
     const operatorFeatures = this.map.queryRenderedFeatures({
       layers: ["transit_operators"]
     });
     const operators = operatorFeatures.map(feature => feature.properties);
     newState["operators"] = operators;
+    }
 
     // Reset highlighted objects when zooming out past minHighlightZoom
     if (zoom < minHighlightZoom) {
