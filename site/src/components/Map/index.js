@@ -14,6 +14,7 @@ import {
   Checkbox,
   Card,
   Grid,
+  List,
   Icon
 } from "semantic-ui-react";
 import { TransitLayer, interactiveLayerIds } from "./TransitLayer";
@@ -275,22 +276,19 @@ class Map extends React.Component {
         title: "Transit Modes",
         content: {
           content: (
-            <Grid columns={1} relaxed>
-              <Grid.Column>
+            <List>
                 {["Tram", "Metro", "Rail", "Bus", "Ferry", "Cablecar"].map(
                   mode => (
-                    <Grid.Row>
+                    <List.Item>
                       <Checkbox
-                        toggle
                         label={`${mode}`}
                         onChange={() => this._toggleState(`include${mode}`)}
                         checked={this.state[`include${mode}`]}
                       />
-                    </Grid.Row>
+                    </List.Item>
                   )
                 )}
-              </Grid.Column>
-            </Grid>
+            </List>
           )
         }
       },
@@ -302,7 +300,6 @@ class Map extends React.Component {
             <div>
               {zoom < minHighlightZoom ? (
                 <Checkbox
-                  toggle
                   disabled
                   label="Zoom in to highlight routes on hover"
                   checked={this.state.highlightRoutesByStop}
@@ -310,7 +307,6 @@ class Map extends React.Component {
               ) : (
                 <div>
                   <Checkbox
-                    toggle
                     label="Highlight routes by stop"
                     onChange={() => this._toggleState("highlightRoutesByStop")}
                     checked={this.state.highlightRoutesByStop}
@@ -324,7 +320,6 @@ class Map extends React.Component {
                 </div>
               )}
               <Checkbox
-                toggle
                 label="Show route labels"
                 onChange={() => this._toggleState("showRouteLabels")}
                 checked={this.state.showRouteLabels}
