@@ -253,6 +253,7 @@ class Map extends React.Component {
         content: {
           content: (
             <div>
+              {zoom >= minOperatorInfoZoom ? (
               <OperatorsList
                 operators={this.state.operators}
                 operatorsDisabled={this.state.operatorsDisabled}
@@ -269,6 +270,9 @@ class Map extends React.Component {
                   });
                 }}
               />
+              ) : (
+                <p>Zoom in to see local operators</p>
+              )}
             </div>
           )
         }
