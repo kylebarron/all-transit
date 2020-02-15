@@ -35,6 +35,7 @@ class Map extends React.Component {
     highlightedStopsOnestopIds: [],
     highlightedRoutesOnestopIds: [],
     showRouteLabels: false,
+    enableScheduleAnimation: true,
     operators: [],
     operatorsDisabled: {},
     zoom: getInitialViewState(this.props.location).zoom || null,
@@ -188,6 +189,7 @@ class Map extends React.Component {
       new TileLayer({
         minZoom: minAnimationZoom,
         maxZoom: 12,
+        visible: this.state.enableScheduleAnimation,
         getTileData: ({ x, y, z }) =>
           fetch(`${baseurl}/${z}/${x}/${y}.json`).then(response =>
             response.json()
@@ -231,7 +233,14 @@ class Map extends React.Component {
         title: "Schedule Animation",
         content: {
           content: zoom >= minAnimationZoom && (
+            <div>
+              <Checkbox
+                label="Enable Animation"
+                onChange={() => this._toggleState("enableScheduleAnimation")}
+                checked={this.state.enableScheduleAnimation}
+              />
             <p>Time: Friday {timeToStr(time)}</p>
+            </div>
           )
         }
       },
