@@ -332,9 +332,7 @@ class Map extends React.Component {
           ref={ref => {
             this.deck = ref;
           }}
-          controller={{
-            type: MapController
-          }}
+          controller
           initialViewState={getInitialViewState(location)}
           ContextProvider={MapContext.Provider}
           onClick={this._updatePicked}
