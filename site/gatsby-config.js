@@ -3,7 +3,8 @@ module.exports = {
 
   // Necessary for a site published to the non-root path,
   // i.e. kylebarron.github.io/all-transit
-  pathPrefix: "/all-transit",
+  // Commented out since I moved to a custom domain
+  // pathPrefix: "/all-transit",
 
   siteMetadata: {
     title: `All Transit`,
