@@ -261,7 +261,9 @@ mb-util \
     `# Existing mbtiles` \
     data/all.mbtiles \
     `# New directory` \
-    data/all
+    data/all \
+    `# Set file extension to pbf` \
+    --image_format=pbf
 ```
 
 Then upload to S3
