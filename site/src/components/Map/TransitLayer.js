@@ -74,7 +74,7 @@ export function TransitLayer(props) {
     <Source
       id="transit"
       type="vector"
-      url="https://mbtiles.nst.guide/services/all-transit/all"
+      url="https://data.kylebarron.dev/all-transit/op_rt_st/tile.json"
     >
       <Layer
         id="transit_operators"
