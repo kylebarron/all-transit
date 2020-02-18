@@ -1,0 +1,11 @@
+{
+    "name": "Transit routes + Transit operators + Transit stops",
+    "description": "Transit information from Transitland API",
+    "attribution": "<a href=\"https://transit.land/\" target=\"_blank\">\u00a9 Transitland</a>",
+    "version": "1.0.0",
+    "minzoom": 0,
+    "maxzoom": 11,
+    "center": [-77.080078, 39.027686, 11],
+    "bounds": [-150.117188, -43.078282, 119.882813, 85.051129],
+    "tiles": ["https://data.kylebarron.dev/all-transit/op_rt_st/{z}/{x}/{y}.pbf"]
+}

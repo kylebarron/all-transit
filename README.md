@@ -244,7 +244,7 @@ tile-join \
     -o data/all.mbtiles \
     --no-tile-size-limit \
     --force \
-    stops.mbtiles operators.mbtiles routes.mbtiles
+    data/stops.mbtiles data/operators.mbtiles data/routes.mbtiles
 ```
 
 Then publish! Host on a small server with
@@ -253,12 +253,43 @@ Then publish! Host on a small server with
 [`mb-util`](https://github.com/mapbox/mbutil) and upload the individual files to
 S3.
 
+I'll upload this to S3:
+
+Export mbtiles to a directory
+```bash
+mb-util \
+    `# Existing mbtiles` \
+    data/all.mbtiles \
+    `# New directory` \
+    data/all
+```
+
+Then upload to S3
+```bash
+# First the tile.json
+aws s3 cp \
+    code/tile/op_rt_st.json s3://data.kylebarron.dev/all-transit/op_rt_st/tile.json \
+    --content-type application/json \
+    `# Set to public read access` \
+    --acl public-read
+aws s3 cp \
+    data/all s3://data.kylebarron.dev/all-transit/op_rt_st/ \
+    --recursive \
+    --content-type application/x-protobuf \
+    --content-encoding gzip \
+    `# Set to public read access` \
+    --acl public-read \
+    `# 6 hour cache; one day swr` \
+    --cache-control "public, max-age=21600, stale-while-revalidate=86400"
+```
+
 ### Schedules
 
-The schedule component is my favorite part of the project. You can see dots
+The schedule component is my favorite part of the project. You can see streaks
 moving around that correspond to transit vehicles: trains, buses, ferries. This
 data is _not simulated_, it takes actual schedule information from the
-Transitland API and matches it to route geometries.
+Transitland API and matches it to route geometries. (Though it's not real-time
+info).
 
 I use the deck.gl
 [`TripsLayer`](https://deck.gl/#/documentation/deckgl-api-reference/layers/trips-layer)
