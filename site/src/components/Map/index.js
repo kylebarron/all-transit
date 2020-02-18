@@ -19,14 +19,15 @@ import {
 import { TransitLayer, interactiveLayerIds } from "./TransitLayer";
 import { OperatorsList } from "./OperatorsList";
 import { Link } from "gatsby";
+import {
+  pickingRadius,
+  minHighlightZoom,
+  minScheduleAnimationZoom,
+  minOperatorInfoZoom
+} from "./constants";
 
 // You'll get obscure errors without including the Mapbox GL CSS
 import "../../css/mapbox-gl.css";
-
-const pickingRadius = 10;
-const minHighlightZoom = 11;
-const minScheduleAnimationZoom = 11;
-const minOperatorInfoZoom = 9;
 
 class Map extends React.Component {
   state = {

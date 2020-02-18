@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Source, Layer } from "react-map-gl";
+import { minOperatorInfoZoom } from "./constants";
 
 // List of Mapbox/React Map GL layer ids that are allowed to be picked
 // These will be picked if no deck.gl layer is above it.
@@ -79,6 +80,7 @@ export function TransitLayer(props) {
         id="transit_operators"
         source-layer="operators"
         type="fill"
+        minzoom={minOperatorInfoZoom}
         paint={{
           "fill-opacity": 0
         }}
