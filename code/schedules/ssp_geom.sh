@@ -33,7 +33,7 @@ function ssp_geom() {
     mkdir -p data/ssp_geom
 
     # Make SQL query string
-    s="SELECT origin_onestop_id, destination_onestop_id, route_onestop_id, origin_departure_time, destination_arrival_time FROM ssp WHERE "
+    s="SELECT origin_onestop_id, destination_onestop_id, route_onestop_id, route_stop_pattern_onestop_id, origin_departure_time, destination_arrival_time FROM ssp WHERE "
     s="${s} route_onestop_id == \"$route_id\" AND "
     # Friday
     s="${s} service_days_of_week_4 = 'true' AND "
@@ -55,6 +55,7 @@ function ssp_geom() {
         | python code/schedules/ssp_geom.py \
             --stops-path data/stops/$operator_id.geojson \
             --routes-path data/routes/$operator_id.geojson \
+            --route-stop-patterns-path data/route_stop_patterns/$operator_id.json \
             - \
             > data/ssp_geom/$route_id.geojson
 

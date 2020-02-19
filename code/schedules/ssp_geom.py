@@ -30,7 +30,12 @@ from shapely.ops import nearest_points, substring
     '--routes-path',
     type=click.Path(exists=True, dir_okay=False, file_okay=True, readable=True),
     required=True,
-    help='Path to stops.geojson, with Transit.land routes')
+    help='Path to routes.geojson, with Transit.land routes')
+@click.option(
+    '--route-stop-patterns-path',
+    type=click.Path(exists=True, dir_okay=False, file_okay=True, readable=True),
+    required=True,
+    help='Path to GeoJSON file with Transit.land route_stop_patterns')
 @click.option(
     '-p',
     '--properties-keys',
@@ -40,7 +45,9 @@ from shapely.ops import nearest_points, substring
     required=False,
     help='Keys of properties to retain in outputted Features')
 @click.argument('ssp-lines', type=click.File())
-def main(stops_path, routes_path, properties_keys, ssp_lines):
+def main(
+        stops_path, routes_path, route_stop_patterns_path, properties_keys,
+        ssp_lines):
     ag = ScheduleStopPairGeometry(
         stops_path=stops_path, routes_path=routes_path)
 
@@ -67,11 +74,12 @@ def main(stops_path, routes_path, properties_keys, ssp_lines):
 
 class ScheduleStopPairGeometry:
     """ScheduleStopPairGeometry"""
-    def __init__(self, stops_path, routes_path):
+    def __init__(self, stops_path, routes_path, route_stop_patterns_path):
         super(ScheduleStopPairGeometry, self).__init__()
 
         self.stops = load_list_as_dict(path=stops_path, id_key='id')
         self.routes = load_list_as_dict(path=routes_path, id_key='id')
+        self.rsp = load_list_as_dict(path=route_stop_patterns_path, id_key='id')
 
     def match_ssp_to_route(self, ssp, properties_keys):
         """Add geometry to ScheduleStopPair
