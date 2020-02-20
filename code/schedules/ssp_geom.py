@@ -32,7 +32,7 @@ from shapely.ops import nearest_points, substring
     required=True,
     help='Path to routes.geojson, with Transit.land routes')
 @click.option(
-    '--route-stop-patterns-path',
+    '--rsp-path',
     type=click.Path(exists=True, dir_okay=False, file_okay=True, readable=True),
     required=False,
     default=None,
@@ -46,17 +46,15 @@ from shapely.ops import nearest_points, substring
     required=False,
     help='Keys of properties to retain in outputted Features')
 @click.argument('ssp-records', type=click.File())
-def main(
-        stops_path, routes_path, route_stop_patterns_path, properties_keys,
-        ssp_records):
-    self = ScheduleStopPairGeometry(
-        stops_path=stops_path,
-        routes_path=routes_path,
-        route_stop_patterns_path=route_stop_patterns_path)
+def main(stops_path, routes_path, rsp_path, properties_keys, ssp_records):
+    ssp_geom = ScheduleStopPairGeometry(
+        stops_path=stops_path, routes_path=routes_path, rsp_path=rsp_path)
 
-    for ssp in ssp_records:
+    for ssp_line in ssp_records:
+        ssp = json.loads(ssp_line)
+
         # Construct GeoJSON Feature of ScheduleStopPair
-        ssp_feature = self.match_ssp_to_route(ssp, properties_keys)
+        ssp_feature = ssp_geom.match_ssp_to_route(ssp, properties_keys)
 
         if ssp_feature is None:
             continue
@@ -67,15 +65,14 @@ def main(
 
 class ScheduleStopPairGeometry:
     """ScheduleStopPairGeometry"""
-    def __init__(self, stops_path, routes_path, route_stop_patterns_path):
+    def __init__(self, stops_path, routes_path, rsp_path):
         super(ScheduleStopPairGeometry, self).__init__()
 
         self.stops = load_list_as_dict(path=stops_path, id_key='id')
         self.routes = load_list_as_dict(path=routes_path, id_key='id')
         self.rsp = None
-        if route_stop_patterns_path:
-            self.rsp = load_list_as_dict(
-                path=route_stop_patterns_path, id_key='id')
+        if rsp_path:
+            self.rsp = load_list_as_dict(path=rsp_path, id_key='id')
 
     def match_ssp_to_route(self, ssp, properties_keys):
         """Add geometry to ScheduleStopPair
