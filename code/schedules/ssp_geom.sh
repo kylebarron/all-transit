@@ -10,7 +10,7 @@ function ssp_geom() {
     echo "Running ssp_geom.sh for operator: $operator_id and route: $route_id"
 
     # If the "finished" file exists, then skip this operator id
-    if [ -f data/ssp_geom/$route_id.finished ]; then
+    if [ -f data/ssp/geom/$route_id.finished ]; then
         echo "Already finished"
         exit 0
     fi
@@ -25,8 +25,9 @@ function ssp_geom() {
         exit 0
     fi
     echo "Matching ScheduleStopPairs to geometries for route: $route_id"
+
     # Make sure output directory exists
-    mkdir -p data/ssp/ssp_geom
+    mkdir -p data/ssp/geom
 
     python code/schedules/select_ssp.py \
         -f data/ssp/sqlite/ssp.db \
@@ -42,11 +43,11 @@ function ssp_geom() {
             --routes-path data/routes/$operator_id.geojson \
             --rsp-path data/rsp/route_stop_patterns.geojson \
             - \
-            > data/ssp/ssp_geom/$route_id.geojson
+            > data/ssp/geom/$route_id.geojson
 
     # Declare that this operator id finished running
     echo "Finished running for route: ${route_id}"
-    touch data/ssp/ssp_geom/${route_id}.finished
+    touch data/ssp/geom/${route_id}.finished
 }
 
 # Run as main
