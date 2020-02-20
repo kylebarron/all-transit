@@ -51,6 +51,7 @@ def main(stops_path, routes_path, rsp_path, properties_keys, ssp_records):
         stops_path=stops_path, routes_path=routes_path, rsp_path=rsp_path)
 
     for ssp_line in ssp_records:
+        # Parse json
         ssp = json.loads(ssp_line)
 
         # Construct GeoJSON Feature of ScheduleStopPair
@@ -98,53 +99,23 @@ class ScheduleStopPairGeometry:
                 file=sys.stderr)
             return None
 
-        orig_stop_geom = asShape(orig_stop['geometry'])
-        dest_stop_geom = asShape(dest_stop['geometry'])
-
         rsp_id = ssp.get('route_stop_pattern_onestop_id')
         route_id = ssp.get('route_onestop_id')
-        route = self.rsp.get(rsp_id) or self.routes.get(route_id)
-        if route is None:
+        rsp = self.rsp.get(rsp_id)
+        route = self.routes.get(route_id)
+
+        if rsp:
+            cut_line = match_using_rsp(rsp, orig_stop, dest_stop)
+        elif route:
+            cut_line = match_using_route(route, orig_stop, dest_stop)
+        else:
             print(f'No route found for ssp: {ssp}', file=sys.stderr)
             return None
-
-        route_geom = asShape(route['geometry'])
-
-        # Note that orig_route_point and dest_route_point are not
-        # necessarily coordinates on the line; they are often interpolated
-        # 4. For the origin and destination stops, find the closest point on
-        # the `RouteStopPattern`
-        _, orig_route_point = nearest_points(orig_stop_geom, route_geom)
-        _, dest_route_point = nearest_points(dest_stop_geom, route_geom)
-
-        if route_geom.type == 'LineString':
-            line_to_split = route_geom
-
-        elif route_geom.type == 'MultiLineString':
-            # Choose the linestring that has the shortest distance to each
-            # route point
-            dists = []
-            for lineString in route_geom:
-                dist = lineString.distance(
-                    orig_route_point) + lineString.distance(dest_route_point)
-                dists.append(dist)
-
-            min_index = dists.index(min(dists))
-            line_to_split = route_geom[min_index]
-
-        else:
-            print(f'route geometry has type {route_geom.type}', file=sys.stderr)
-            return None
-
-        # Now that you have the shortest lineString, split it
-        d1 = line_to_split.project(orig_route_point)
-        d2 = line_to_split.project(dest_route_point)
-        cut_line = substring(line_to_split, d1, d2)
 
         # If cut_line is not a LineString, the linear referencing methods won't
         # work
         if cut_line.type != 'LineString':
-            print(f'cut line has type {route_geom.type}', file=sys.stderr)
+            print(f'cut line has type {cut_line.type}', file=sys.stderr)
             return None
 
         # 6. For each coordinate of the `LineString` between `origin` and
@@ -177,6 +148,53 @@ class ScheduleStopPairGeometry:
 
         properties = {k: v for k, v in ssp.items() if k in properties_keys}
         return geojson.Feature(geometry=l, properties=properties)
+
+
+def match_using_route(route, orig_stop, dest_stop):
+    """Assign geometry to ScheduleStopPair using route
+    """
+    orig_stop_geom = asShape(orig_stop['geometry'])
+    dest_stop_geom = asShape(dest_stop['geometry'])
+    route_geom = asShape(route['geometry'])
+
+    # Note that orig_route_point and dest_route_point are not
+    # necessarily coordinates on the line; they are often interpolated
+    # 4. For the origin and destination stops, find the closest point on
+    # the `RouteStopPattern`
+    _, orig_route_point = nearest_points(orig_stop_geom, route_geom)
+    _, dest_route_point = nearest_points(dest_stop_geom, route_geom)
+    # Vis([orig_stop_geom, dest_stop_geom, MultiPoint(route_geom.coords)])
+    # from shapely.geometry import MultiPoint
+
+    if route_geom.type == 'LineString':
+        line_to_split = route_geom
+
+    elif route_geom.type == 'MultiLineString':
+        # Choose the linestring that has the shortest distance to each
+        # route point
+        dists = []
+        for lineString in route_geom:
+            dist = lineString.distance(orig_route_point) + lineString.distance(
+                dest_route_point)
+            dists.append(dist)
+
+        min_index = dists.index(min(dists))
+        line_to_split = route_geom[min_index]
+
+    else:
+        print(f'route geometry has type {route_geom.type}', file=sys.stderr)
+        return None
+
+    # Now that you have the shortest lineString, split it
+    d1 = line_to_split.project(orig_route_point)
+    d2 = line_to_split.project(dest_route_point)
+    return substring(line_to_split, d1, d2)
+
+
+def match_using_rsp(rsp, orig_stop, dest_stop):
+    """Assign geometry to ScheduleStopPair using RouteStopPattern
+    """
+    pass
 
 
 def time_str_to_seconds(s):
