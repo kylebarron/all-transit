@@ -53,17 +53,28 @@ import click
     default='ssp',
     show_default=True,
     help='Name of ScheduleStopPairs table in the sqlite database')
+@click.option(
+    '-c',
+    '--column',
+    type=str,
+    required=False,
+    default=None,
+    help='Extra columns to extract')
 def main(
         sqlite_path, table_name, route_id, origin_departure_hour,
-        service_days_of_week, service_date):
+        service_days_of_week, service_date, column):
     """Select ScheduleStopPairs from SQLite database
     """
     conn = sqlite3.connect(sqlite_path)
     conn.row_factory = sqlite3.Row
 
     query_str = generate_query(
-        table_name, origin_departure_hour, service_days_of_week, service_date,
-        route_id)
+        table_name=table_name,
+        origin_departure_hour=origin_departure_hour,
+        service_days_of_week=service_days_of_week,
+        service_date=service_date,
+        route_id=route_id,
+        columns=column)
     for record in run_query(conn, query_str):
         print(json.dumps(record, separators=(',', ':')))
 
@@ -95,15 +106,15 @@ def generate_query(
     """
 
     # Define default column names
-    if not columns:
-        columns = [
-            'origin_onestop_id', 'destination_onestop_id', 'route_onestop_id',
-            'route_stop_pattern_onestop_id', 'origin_departure_time',
-            'destination_arrival_time']
+    default_columns = [
+        'origin_onestop_id', 'destination_onestop_id', 'route_onestop_id',
+        'route_stop_pattern_onestop_id', 'origin_departure_time',
+        'destination_arrival_time']
+    if columns:
+        assert type(columns) in [list, tuple], 'columns must be list or tuple'
+        default_columns.extend(columns)
 
-    assert type(columns) in [list, tuple], 'columns must be list or tuple'
-    column_str = ', '.join(columns)
-
+    column_str = ', '.join(set(default_columns))
     execute_str = f'SELECT {column_str} FROM {table_name} WHERE '
 
     # Where clause
