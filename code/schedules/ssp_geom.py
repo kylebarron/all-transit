@@ -34,7 +34,8 @@ from shapely.ops import nearest_points, substring
 @click.option(
     '--route-stop-patterns-path',
     type=click.Path(exists=True, dir_okay=False, file_okay=True, readable=True),
-    required=True,
+    required=False,
+    default=None,
     help='Path to GeoJSON file with Transit.land route_stop_patterns')
 @click.option(
     '-p',
@@ -48,8 +49,10 @@ from shapely.ops import nearest_points, substring
 def main(
         stops_path, routes_path, route_stop_patterns_path, properties_keys,
         ssp_lines):
-    ag = ScheduleStopPairGeometry(
-        stops_path=stops_path, routes_path=routes_path)
+    self = ScheduleStopPairGeometry(
+        stops_path=stops_path,
+        routes_path=routes_path,
+        route_stop_patterns_path=route_stop_patterns_path)
 
     try:
         header_line = next(ssp_lines).strip()
@@ -63,7 +66,7 @@ def main(
         ssp = {k: v for k, v in zip(headers, line.strip().split('|'))}
 
         # Construct GeoJSON Feature of ScheduleStopPair
-        ssp_feature = ag.match_ssp_to_route(ssp, properties_keys)
+        ssp_feature = self.match_ssp_to_route(ssp, properties_keys)
 
         if ssp_feature is None:
             continue
@@ -79,7 +82,10 @@ class ScheduleStopPairGeometry:
 
         self.stops = load_list_as_dict(path=stops_path, id_key='id')
         self.routes = load_list_as_dict(path=routes_path, id_key='id')
-        self.rsp = load_list_as_dict(path=route_stop_patterns_path, id_key='id')
+        self.rsp = None
+        if route_stop_patterns_path:
+            self.rsp = load_list_as_dict(
+                path=route_stop_patterns_path, id_key='id')
 
     def match_ssp_to_route(self, ssp, properties_keys):
         """Add geometry to ScheduleStopPair
@@ -108,8 +114,13 @@ class ScheduleStopPairGeometry:
         orig_stop_geom = asShape(orig_stop['geometry'])
         dest_stop_geom = asShape(dest_stop['geometry'])
 
-        route_id = ssp['route_onestop_id']
-        route = self.routes[route_id]
+        rsp_id = ssp.get('route_stop_pattern_onestop_id')
+        route_id = ssp.get('route_onestop_id')
+        route = self.rsp.get(rsp_id) or self.routes.get(route_id)
+        if route is None:
+            print(f'No route found for ssp: {ssp}', file=sys.stderr)
+            return None
+
         route_geom = asShape(route['geometry'])
 
         # Note that orig_route_point and dest_route_point are not
