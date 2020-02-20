@@ -16,8 +16,9 @@ import sys
 
 import click
 import geojson
-from shapely.geometry import LineString, Point, asShape
-from shapely.ops import nearest_points, substring
+import pyproj
+from shapely.geometry import LineString, Point, asShape, shape
+from shapely.ops import nearest_points, substring, transform
 
 
 @click.command()
@@ -105,9 +106,10 @@ class ScheduleStopPairGeometry:
         route = self.routes.get(route_id)
 
         if rsp:
-            cut_line = match_using_rsp(rsp, orig_stop, dest_stop)
+            cut_line = match_using_rsp(ssp=ssp, rsp=rsp, orig_stop=orig_stop)
         elif route:
-            cut_line = match_using_route(route, orig_stop, dest_stop)
+            cut_line = match_using_route(
+                route=route, orig_stop=orig_stop, dest_stop=dest_stop)
         else:
             print(f'No route found for ssp: {ssp}', file=sys.stderr)
             return None
@@ -191,10 +193,44 @@ def match_using_route(route, orig_stop, dest_stop):
     return substring(line_to_split, d1, d2)
 
 
-def match_using_rsp(rsp, orig_stop, dest_stop):
+def match_using_rsp(ssp, rsp, orig_stop):
     """Assign geometry to ScheduleStopPair using RouteStopPattern
     """
-    pass
+    orig_stop_geom = shape(orig_stop['geometry'])
+    route_geom = shape(rsp['geometry'])
+
+    # Find local UTM zone
+    # https://gis.stackexchange.com/a/190209
+    lon, lat = orig_stop_geom.coords[0]
+    utm_epsg = int(
+        32700 - round((45 + lat) / 90, 0) * 100 + round((183 + lon) / 6, 0))
+
+    # Reproject route to meters using local UTM zone
+    proj_route_geom = reproject(route_geom, from_epsg=4326, to_epsg=utm_epsg)
+
+    # Take substring of route
+    orig_m = float(ssp['origin_dist_traveled'])
+    dest_m = float(ssp['destination_dist_traveled'])
+    proj_cut_route = substring(proj_route_geom, orig_m, dest_m)
+
+    # Reproject back to WGS84
+    cut_route = reproject(proj_cut_route, from_epsg=utm_epsg, to_epsg=4326)
+    return cut_route
+
+
+def reproject(geometry, from_epsg, to_epsg):
+    """Reproject geometric object to new coordinate system
+
+    Args:
+        - geometry: shapely geometry. NOTE MUST NOT BE CREATED FROM `asShape`
+        - to_epsg: new crs, should be epsg integer
+        - from_epsg: old crs
+    """
+    project = pyproj.Transformer.from_proj(
+        pyproj.Proj(init=f'epsg:{from_epsg}'),
+        pyproj.Proj(init=f'epsg:{to_epsg}'))
+
+    return transform(project.transform, geometry)
 
 
 def time_str_to_seconds(s):
