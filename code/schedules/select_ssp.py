@@ -59,6 +59,7 @@ import click
     type=str,
     required=False,
     default=None,
+    multiple=True,
     help='Extra columns to extract')
 def main(
         sqlite_path, table_name, route_id, origin_departure_hour,
