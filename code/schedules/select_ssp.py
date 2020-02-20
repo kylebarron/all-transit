@@ -66,6 +66,8 @@ def main(
         service_days_of_week, service_date, column):
     """Select ScheduleStopPairs from SQLite database
     """
+    # Setting the row_factory attribute allows for creating dict-like objects
+    # https://stackoverflow.com/a/18788347
     conn = sqlite3.connect(sqlite_path)
     conn.row_factory = sqlite3.Row
 
