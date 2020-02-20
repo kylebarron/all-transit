@@ -45,26 +45,16 @@ from shapely.ops import nearest_points, substring
     default=[],
     required=False,
     help='Keys of properties to retain in outputted Features')
-@click.argument('ssp-lines', type=click.File())
+@click.argument('ssp-records', type=click.File())
 def main(
         stops_path, routes_path, route_stop_patterns_path, properties_keys,
-        ssp_lines):
+        ssp_records):
     self = ScheduleStopPairGeometry(
         stops_path=stops_path,
         routes_path=routes_path,
         route_stop_patterns_path=route_stop_patterns_path)
 
-    try:
-        header_line = next(ssp_lines).strip()
-    except StopIteration:
-        print('no data received. Exiting', file=sys.stderr)
-        return
-
-    headers = header_line.split('|')
-    for line in ssp_lines:
-        # Parse JSON as dict
-        ssp = {k: v for k, v in zip(headers, line.strip().split('|'))}
-
+    for ssp in ssp_records:
         # Construct GeoJSON Feature of ScheduleStopPair
         ssp_feature = self.match_ssp_to_route(ssp, properties_keys)
 

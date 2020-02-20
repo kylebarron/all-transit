@@ -32,24 +32,13 @@ function ssp_geom() {
     # Make sure output directory exists
     mkdir -p data/ssp_geom
 
-    # Make SQL query string
-    s="SELECT origin_onestop_id, destination_onestop_id, route_onestop_id, route_stop_pattern_onestop_id, origin_departure_time, destination_arrival_time FROM ssp WHERE "
-    s="${s} route_onestop_id == \"$route_id\" AND "
-    # Friday
-    s="${s} service_days_of_week_4 = 'true' AND "
-    # Origin departure >= 4pm
-    s="${s} CAST(SUBSTR(origin_departure_time, 0, 3) AS INT) >= 16 AND "
-    # Origin departure before 8pm
-    s="${s} CAST(SUBSTR(origin_departure_time, 0, 3) AS INT) < 20 AND "
-    # Service started before date of interest
-    s="${s} DATE('2020-02-07') >= DATE(service_start_date) AND "
-    # Service ended after date of interest
-    s="${s} DATE('2020-02-07') < DATE(service_end_date) "
-    # Add semicolon
-    s="${s};"
-
-    # Read from Sqlite3 and write to stdout
-    sqlite3 data/ssp_sqlite/ssp.db -header "$s" \
+    python code/schedules/select_ssp.py \
+        -f data/ssp_sqlite/ssp.db \
+        --route-id "$route_id" \
+        --service-date '2020-02-07' \
+        --service-days-of-week 4 \
+        --origin-departure-hour 16 \
+        --origin-departure-hour 20 \
         `# Run python script to attach geometries to ScheduleStopPairs` \
         `# - signifies that the ScheduleStopPair data is coming from stdin` \
         | python code/schedules/ssp_geom.py \
