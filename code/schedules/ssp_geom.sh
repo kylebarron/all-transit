@@ -37,9 +37,10 @@ function ssp_geom() {
         --origin-departure-hour 16 \
         --origin-departure-hour 20 \
         `# extra columns to extract from sqlite` \
-        -c trip \
-        -c origin_timepoint_source \
         -c destination_timepoint_source \
+        -c operator_onestop_id \
+        -c origin_timepoint_source \
+        -c trip \
         `# Run python script to attach geometries to ScheduleStopPairs` \
         `# - signifies that the ScheduleStopPair data is coming from stdin` \
         | python code/schedules/ssp_geom.py \
@@ -48,17 +49,18 @@ function ssp_geom() {
             --rsp-path data/rsp/route_stop_patterns.geojson \
             `# property names to include in geojson output` \
             `# I include extra properties for debugging; they'll be removed on final minification` \
-            -p origin_onestop_id \
+            -p destination_arrival_time \
+            -p destination_dist_traveled \
             -p destination_onestop_id \
+            -p destination_timepoint_source \
+            -p operator_onestop_id \
+            -p origin_departure_time \
+            -p origin_dist_traveled \
+            -p origin_onestop_id \
+            -p origin_timepoint_source \
             -p route_onestop_id \
             -p route_stop_pattern_onestop_id \
-            -p origin_departure_time \
-            -p destination_arrival_time \
             -p trip \
-            -p origin_dist_traveled \
-            -p destination_dist_traveled \
-            -p origin_timepoint_source \
-            -p destination_timepoint_source \
             - \
             > data/ssp/geom/$route_id.geojson
 
