@@ -1,0 +1,20 @@
+{
+    "name": "all-transit-svg",
+    "version": "0.1.0",
+    "description": "Create SVG with transit data",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": {
+        "name": "Kyle Barron",
+        "url": "https://kylebarron.dev"
+    },
+    "devDependencies": {
+        "d3-array": "^1.0.1",
+        "d3-geo-projection": "^1.2.1",
+        "shapefile": "^0.5.8",
+        "svgexport": "^0.4.0",
+        "svgo": "^1.3.2"
+    },
+    "license": "MIT"
+}
