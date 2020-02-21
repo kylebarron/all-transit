@@ -7,4 +7,8 @@
   <g transform="translate(487,30)" font-size="20" font-family="Open Sans" text-anchor="middle">
     <text x="0" y="0" stroke="#a0abc5" fill="#a0abc5" text-anchor="middle">All Transit</text>
   </g>
+  <g transform="translate(975,500)" font-size="9" font-family="Open Sans" text-anchor="end">
+    <text x="0" y="-20" stroke="#a0abc5" fill="#a0abc5">Kyle Barron</text>
+    <text x="0" y="-5" stroke="#a0abc5" fill="#a0abc5" font-weight="lighter">https://all-transit.com</text>
+  </g>
 </svg>
