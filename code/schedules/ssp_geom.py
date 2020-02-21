@@ -18,7 +18,7 @@ import click
 import geojson
 import pyproj
 from shapely.geometry import LineString, Point, asShape, shape
-from shapely.ops import nearest_points, substring, transform
+from shapely.ops import nearest_points, transform
 
 
 @click.command()
@@ -216,6 +216,67 @@ def match_using_rsp(ssp, rsp, orig_stop):
     # Reproject back to WGS84
     cut_route = reproject(proj_cut_route, from_epsg=utm_epsg, to_epsg=4326)
     return cut_route
+
+
+def substring(geom, start_dist, end_dist, normalized=False):
+    """Return a line segment between specified distances along a linear geometry.
+
+    This is a modification of shapely.ops.substring to fix shapely #848
+
+    Negative distance values are taken as measured in the reverse
+    direction from the end of the geometry. Out-of-range index
+    values are handled by clamping them to the valid range of values.
+    If the start distances equals the end distance, a point is being returned.
+    If the normalized arg is True, the distance will be interpreted as a
+    fraction of the geometry's length.
+    """
+
+    assert (isinstance(geom, LineString))
+
+    # Filter out cases in which to return a point
+    if start_dist == end_dist:
+        return geom.interpolate(start_dist, normalized)
+    elif not normalized and start_dist >= geom.length and end_dist >= geom.length:
+        return geom.interpolate(geom.length, normalized)
+    elif not normalized and -start_dist >= geom.length and -end_dist >= geom.length:
+        return geom.interpolate(0, normalized)
+    elif normalized and start_dist >= 1 and end_dist >= 1:
+        return geom.interpolate(1, normalized)
+    elif normalized and -start_dist >= 1 and -end_dist >= 1:
+        return geom.interpolate(0, normalized)
+
+    start_point = geom.interpolate(start_dist, normalized)
+    end_point = geom.interpolate(end_dist, normalized)
+
+    min_dist = min(start_dist, end_dist)
+    max_dist = max(start_dist, end_dist)
+    if normalized:
+        min_dist *= geom.length
+        max_dist *= geom.length
+
+    if start_dist < end_dist:
+        vertex_list = [(start_point.x, start_point.y)]
+    else:
+        vertex_list = [(end_point.x, end_point.y)]
+
+    coords = list(geom.coords)
+    current_distance = 0
+    for p1, p2 in zip(coords, coords[1:]):
+        if min_dist < current_distance < max_dist:
+            vertex_list.append(p1)
+        elif current_distance >= max_dist:
+            break
+
+        current_distance += LineString([p1, p2]).length
+
+    if start_dist < end_dist:
+        vertex_list.append((end_point.x, end_point.y))
+    else:
+        vertex_list.append((start_point.x, start_point.y))
+        # reverse direction result
+        vertex_list = reversed(vertex_list)
+
+    return LineString(vertex_list)
 
 
 def reproject(geometry, from_epsg, to_epsg):
