@@ -48,7 +48,7 @@ cat \
         `# Set "stroke" based on color in route properties` \
         `# Use hsl(229, 50%, 35%) as fallback if route color does not exist` \
         `# Then set stroke-width for all routes` \
-        | jq -c 'if (.properties.color == "") or (.properties.color == "000000") or (.properties.color == "ffffff") then .properties.stroke = "hsl(229, 50%, 35%)" else .properties.stroke = ("#" + .properties.color) end | .properties += {"stroke-width": 0.3}' \
+        | jq -c 'if (.properties.color == "") or (.properties.color == "000000") or (.properties.color == "ffffff") then .properties.stroke = "hsl(229, 50%, 35%)" else .properties.stroke = ("#" + .properties.color) end | .properties += {"stroke-width": 0.4}' \
         ) \
     `# Reproject all data to given projection; use -n for newline-delimited GeoJSON` \
     | geoproject -n "${PROJECTION}" \
