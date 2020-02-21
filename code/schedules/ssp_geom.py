@@ -199,11 +199,7 @@ def match_using_rsp(ssp, rsp, orig_stop):
     orig_stop_geom = shape(orig_stop['geometry'])
     route_geom = shape(rsp['geometry'])
 
-    # Find local UTM zone
-    # https://gis.stackexchange.com/a/190209
-    lon, lat = orig_stop_geom.coords[0]
-    utm_epsg = int(
-        32700 - round((45 + lat) / 90, 0) * 100 + round((183 + lon) / 6, 0))
+    utm_epsg = get_local_utm_zone(orig_stop_geom)
 
     # Reproject route to meters using local UTM zone
     proj_route_geom = reproject(route_geom, from_epsg=4326, to_epsg=utm_epsg)
@@ -292,6 +288,16 @@ def reproject(geometry, from_epsg, to_epsg):
         pyproj.Proj(init=f'epsg:{to_epsg}'))
 
     return transform(project.transform, geometry)
+
+
+def get_local_utm_zone(point):
+    # Find local UTM zone
+    # https://gis.stackexchange.com/a/190209
+    lon, lat = point.coords[0]
+    utm_epsg = int(
+        32700 - round((45 + lat) / 90, 0) * 100 + round((183 + lon) / 6, 0))
+
+    return utm_epsg
 
 
 def time_str_to_seconds(s):
