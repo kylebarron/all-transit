@@ -17,6 +17,7 @@ import sys
 import click
 import geojson
 import pyproj
+from haversine import Unit, haversine
 from shapely.geometry import LineString, Point, asShape, shape
 from shapely.ops import nearest_points, transform
 
@@ -108,8 +109,22 @@ class ScheduleStopPairGeometry:
         if rsp:
             cut_line = match_using_rsp(ssp=ssp, rsp=rsp, orig_stop=orig_stop)
         elif route:
-            cut_line = match_using_route(
-                route=route, orig_stop=orig_stop, dest_stop=dest_stop)
+            # Try to match by rsp first
+            rsp_ids = route['properties']['route_stop_patterns_by_onestop_id']
+
+            # Retrieve rsp objects
+            rsps = [self.rsp.get(rsp_id) for rsp_id in rsp_ids]
+            rsps = [x for x in rsps if x is not None]
+
+            # Try to match with one of the route stop patterns
+            cut_line = attempt_match_among_rsps(
+                ssp=ssp, rsps=rsps, orig_stop=orig_stop, dest_stop=dest_stop)
+
+            # Otherwise, fall back to matching purely based on route and linear
+            # referencing
+            if cut_line is None:
+                cut_line = match_using_route(
+                    route=route, orig_stop=orig_stop, dest_stop=dest_stop)
         else:
             print(f'No route found for ssp: {ssp}', file=sys.stderr)
             return None
@@ -212,6 +227,35 @@ def match_using_rsp(ssp, rsp, orig_stop):
     # Reproject back to WGS84
     cut_route = reproject(proj_cut_route, from_epsg=utm_epsg, to_epsg=4326)
     return cut_route
+
+
+def attempt_match_among_rsps(ssp, rsps, orig_stop, dest_stop):
+    """Attempt a match among rsps
+
+    For each route stop pattern, cut it by ori
+    """
+    orig_stop_geom = asShape(orig_stop['geometry'])
+    dest_stop_geom = asShape(dest_stop['geometry'])
+
+    cut_lines = []
+    dists = []
+    for rsp in rsps:
+        cut_line = match_using_rsp(ssp, rsp, orig_stop)
+        start_dist = haversine(
+            orig_stop_geom.coords[0], cut_line.coords[0], Unit.METERS)
+        end_dist = haversine(
+            dest_stop_geom.coords[0], cut_line.coords[-1], Unit.METERS)
+
+        # Only allow matching if start and end are within 100 meters of stop
+        if start_dist < 100 and end_dist < 100:
+            cut_lines.append(cut_line)
+            dists.append(start_dist + end_dist)
+
+    if len(dists) == 0:
+        return None
+
+    min_index = dists.index(min(dists))
+    return cut_lines[min_index]
 
 
 def substring(geom, start_dist, end_dist, normalized=False):
