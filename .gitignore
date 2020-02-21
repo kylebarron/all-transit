@@ -1,4 +1,8 @@
+tmp/
+tmp
 *.geojson
+data/
+data_us/
 
 # Created by https://www.gitignore.io/api/osx,vim,node,windows,visualstudiocode
 
