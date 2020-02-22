@@ -16,11 +16,13 @@ def main(features):
     """Convert ScheduleStopPair GeoJSON LineStrings to PBF
     """
     # Instantiate objects
+    # The `length` Deck.GL is expecting is the total number of coordinates, not
+    # number of features
     positions = []
     timestamps = []
     indices = [0]
     index = 0
-    n_features = 0
+    n_coords = 0
 
     # Loop over features from stdin
     for feature in features:
@@ -34,22 +36,22 @@ def main(features):
             positions.extend(coord[:2])
             timestamps.append(coord[2])
             index += 1
+            n_coords += 1
 
         indices.append(index)
-        n_features += 1
 
     # Minimal validation
     msg = 'should be 2x positions for each timestamp'
     assert len(positions) == 2 * len(timestamps), msg
     msg = 'incorrect # of indices'
-    assert len(indices) == n_features + 1, msg
+    assert indices[-1] == n_coords, msg
 
     # Create tile
     schedule_tile = schedule_tile_pb2.ScheduleTile()
     schedule_tile.positions.extend(positions)
     schedule_tile.timestamps.extend(timestamps)
     schedule_tile.startIndices.extend(indices)
-    schedule_tile.length = n_features
+    schedule_tile.length = n_coords
 
     # Write to stdout
     # https://stackoverflow.com/a/908440
