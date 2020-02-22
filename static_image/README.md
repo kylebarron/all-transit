@@ -108,8 +108,9 @@ Dependencies include
 - `shapefile`: for converting the `states.shp` shapefile to GeoJSON
 - `svgo`: for simplifying the exported svg.
 - `svgexport`: for converting the simplified svg (still >50MB) to png.
+- `pngquant`: for compressing the output png
 
-You can install all these dependencies with
+You can install _most_ of these dependencies with
 ```
 yarn install
 ```
@@ -118,6 +119,13 @@ or
 npm install
 ```
 and the necessary binaries will be located at `./node_modules/.bin`.
+
+You'll need to install `pngquant` separately. On macOS, it can be installed with
+homebrew:
+
+```bash
+brew install pngquant
+```
 
 ### Run
 

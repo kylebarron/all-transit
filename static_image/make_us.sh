@@ -75,3 +75,6 @@ NODE_OPTIONS=--max_old_space_size=8192 \
 # 45516E is the same background color as my map style uses
 # https://github.com/kylebarron/fiord-color-gl-style/blob/3c19aa5f91a072c356fcda0f0f0866a7fdf9082d/style.json#L33-L37
 svgexport data/us_comp.svg us.png 8x "svg{background:#45516E;}"
+
+# Compress png using pngquant
+pngquant us.png --quality=80 --ext .png -f
