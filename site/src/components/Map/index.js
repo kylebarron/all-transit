@@ -25,6 +25,8 @@ import {
   minScheduleAnimationZoom,
   minOperatorInfoZoom
 } from "./constants";
+import Protobuf from "pbf"
+import {ScheduleTile} from "../../schedule_tile"
 
 // You'll get obscure errors without including the Mapbox GL CSS
 import "../../css/mapbox-gl.css";
@@ -189,7 +191,8 @@ class Map extends React.Component {
   };
 
   _renderDeckLayers() {
-    const baseurl = "https://data.kylebarron.dev/all-transit/schedule/4_16-20";
+    // const baseurl = "https://data.kylebarron.dev/all-transit/schedule/4_16-20";
+    const baseurl = "https://data.kylebarron.dev/all-transit/schedule/test_pbf";
 
     return [
       new TileLayer({
@@ -197,9 +200,18 @@ class Map extends React.Component {
         maxZoom: 13,
         visible: this.state.enableScheduleAnimation,
         getTileData: ({ x, y, z }) =>
-          fetch(`${baseurl}/${z}/${x}/${y}.json`).then(response =>
-            response.json()
-          ),
+          fetch(`${baseurl}/${z}/${x}/${y}.pbf`).then(response => {
+            if (response.status === 200) {
+              return response.arrayBuffer();
+            }
+            return null;
+          }).then(buffer => {
+            if (buffer) {
+              const pbf = new Protobuf(buffer);
+              return ScheduleTile.read(pbf)
+            }
+            return null;
+          }),
 
         // this prop is passed on to the TripsLayer that's rendered as a
         // SubLayer. Otherwise, the TripsLayer can't access the state being
@@ -207,17 +219,31 @@ class Map extends React.Component {
         currentTime: this.state.time,
 
         renderSubLayers: props => {
+          if (!props.data) return null;
           return new TripsLayer(props, {
-            data: props.data,
-            getPath: d => d.map(p => p.slice(0, 2)),
-            getTimestamps: d => d.map(p => p.slice(2)),
+            data: {
+              length: props.data.length,
+              startIndices: new Uint32Array(props.data.startIndices), // this is required to render the paths correctly!
+              attributes: {
+                getPath: {
+                  value: new Float32Array(props.data.positions),
+                  size: 2
+                },
+                getTimestamps: {
+                  value: new Float32Array(props.data.timestamps),
+                  size: 1
+                }
+              }
+            },
             getColor: [253, 128, 93],
             opacity: 0.7,
             widthMinPixels: 3,
+            widthMaxPixels: 4,
             rounded: true,
-            trailLength: 50,
+            trailLength: 40,
             currentTime: props.currentTime,
-            shadowEnabled: false
+            shadowEnabled: false,
+            _pathType: "open" // this instructs the layer to skip normalization and use the binary as-is
           });
         }
       })
