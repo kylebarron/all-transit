@@ -8,7 +8,7 @@
     <text x="0" y="0" stroke="#a0abc5" fill="#a0abc5" text-anchor="middle">All Transit</text>
   </g>
   <g transform="translate(975,500)" font-size="9" font-family="Lato" text-anchor="end">
-    <text x="-10" y="-20" stroke="#a0abc5" fill="#a0abc5" font-weight="100">Kyle Barron</text>
-    <text x="-10" y="-5" stroke="#a0abc5" fill="#a0abc5" font-weight="100">https://all-transit.com</text>
+    <text x="-5" y="-20" stroke="#a0abc5" fill="#a0abc5" font-weight="100">Kyle Barron</text>
+    <text x="-5" y="-5" stroke="#a0abc5" fill="#a0abc5" font-weight="100">https://all-transit.com</text>
   </g>
 </svg>
