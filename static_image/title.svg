@@ -2,13 +2,13 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="975" height="500" viewBox="0 0 975 500" fill="none">
   <defs>
-      <style type="text/css">@import url('https://fonts.googleapis.com/css?family=Open+Sans');</style>
+      <style type="text/css">@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400|Lato:100');</style>
   </defs>
   <g transform="translate(487,30)" font-size="20" font-family="Open Sans" text-anchor="middle">
     <text x="0" y="0" stroke="#a0abc5" fill="#a0abc5" text-anchor="middle">All Transit</text>
   </g>
-  <g transform="translate(975,500)" font-size="9" font-family="Open Sans" text-anchor="end">
-    <text x="0" y="-20" stroke="#a0abc5" fill="#a0abc5">Kyle Barron</text>
-    <text x="0" y="-5" stroke="#a0abc5" fill="#a0abc5" font-weight="lighter">https://all-transit.com</text>
+  <g transform="translate(975,500)" font-size="9" font-family="Lato" text-anchor="end">
+    <text x="-10" y="-20" stroke="#a0abc5" fill="#a0abc5" font-weight="100">Kyle Barron</text>
+    <text x="-10" y="-5" stroke="#a0abc5" fill="#a0abc5" font-weight="100">https://all-transit.com</text>
   </g>
 </svg>
