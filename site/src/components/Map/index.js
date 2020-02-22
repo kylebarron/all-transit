@@ -223,7 +223,7 @@ class Map extends React.Component {
           return new TripsLayer(props, {
             data: {
               length: props.data.length,
-              startIndices: new Uint32Array(props.data.startIndices), // this is required to render the paths correctly!
+              startIndices: new Uint16Array(props.data.startIndices), // this is required to render the paths correctly!
               attributes: {
                 getPath: {
                   value: new Float32Array(props.data.positions),
@@ -236,9 +236,9 @@ class Map extends React.Component {
               }
             },
             getColor: [253, 128, 93],
+            getWidth: 3,
+            widthUnits: 'pixels',
             opacity: 0.7,
-            widthMinPixels: 3,
-            widthMaxPixels: 4,
             rounded: true,
             trailLength: 40,
             currentTime: props.currentTime,
