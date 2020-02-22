@@ -1,0 +1,10 @@
+syntax = "proto2";
+
+package alltransit;
+
+message ScheduleTile {
+  repeated float positions = 1 [packed=true];
+  repeated float timestamps = 2 [packed=true];
+  repeated uint32 startIndices = 3 [packed=true];
+  optional uint32 length = 4;
+}
