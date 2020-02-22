@@ -382,6 +382,9 @@ class Map extends React.Component {
           layers={this._renderDeckLayers()}
           pickingRadius={pickingRadius}
           onViewStateChange={this.onViewStateChange}
+          // Controls the resolution of drawing buffer used for rendering
+          // false: CSS pixels resolution (equal to the canvas size) is used for rendering
+          useDevicePixels={false}
         >
           <StaticMap
             ref={ref => {
