@@ -1,8 +1,8 @@
-# All transit
+# All Transit
 
 [![Build Status](https://travis-ci.org/kylebarron/all-transit.svg?branch=master)](https://travis-ci.org/kylebarron/all-transit)
 
-[![Example Screenshot](assets/overview_screenshot.png)](https://kylebarron.dev/all-transit)
+[![Static image of US Transit](static_image/us.png)](https://all-transit.com)
 
 [Website: https://kylebarron.dev/all-transit](https://kylebarron.dev/all-transit)
 
