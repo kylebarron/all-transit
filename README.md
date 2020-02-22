@@ -15,6 +15,12 @@ Streets_](https://benfry.com/allstreets/map5.html).
 The code for the website is in `site/`. It uses React, Gatsby, Deck.gl, and
 React Map GL/Mapbox GL JS.
 
+## Static SVG/PNG
+
+The `static_image` folder contains code to generate an SVG and PNG of all the
+routes in the U.S. It uses `d3` and
+[`geo2svg`](https://github.com/d3/d3-geo-projection/blob/master/README.md#geo2svg).
+
 ## Data
 
 Most of the data-generating code for this project is done in Bash,
