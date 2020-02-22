@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/kylebarron/all-transit/issues"
   },
-  "homepage": "https://github.com/kylebarron/all-transit#readme"
+  "homepage": "https://github.com/kylebarron/all-transit#readme",
+  "dependencies": {
+    "pbf": "^3.2.1"
+  }
 }
