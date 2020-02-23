@@ -239,7 +239,7 @@ class Map extends React.Component {
             if (response.status === 200) {
               return response.json();
             }
-            return null;
+            return [];
           }),
 
         // this prop is passed on to the TripsLayer that's rendered as a
