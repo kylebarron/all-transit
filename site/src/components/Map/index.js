@@ -191,8 +191,9 @@ class Map extends React.Component {
   };
 
   _renderDeckLayers() {
-    // const baseurl = "https://data.kylebarron.dev/all-transit/schedule/4_16-20";
-    const baseurl = "https://data.kylebarron.dev/all-transit/schedule/test_pbf";
+    // Should've named this better, but this is the current dir of json files
+    const baseurl =
+      "https://data.kylebarron.dev/all-transit/tmpjson/schedule/4_16-20";
 
     return [
       new TileLayer({
@@ -200,15 +201,9 @@ class Map extends React.Component {
         maxZoom: 13,
         visible: this.state.enableScheduleAnimation,
         getTileData: ({ x, y, z }) =>
-          fetch(`${baseurl}/${z}/${x}/${y}.pbf`).then(response => {
+          fetch(`${baseurl}/${z}/${x}/${y}.json`).then(response => {
             if (response.status === 200) {
-              return response.arrayBuffer();
-            }
-            return null;
-          }).then(buffer => {
-            if (buffer) {
-              const pbf = new Protobuf(buffer);
-              return ScheduleTile.read(pbf)
+              return response.json();
             }
             return null;
           }),
@@ -219,31 +214,21 @@ class Map extends React.Component {
         currentTime: this.state.time,
 
         renderSubLayers: props => {
-          if (!props.data) return null;
           return new TripsLayer(props, {
-            data: {
-              length: props.data.length,
-              startIndices: new Uint16Array(props.data.startIndices), // this is required to render the paths correctly!
-              attributes: {
-                getPath: {
-                  value: new Float32Array(props.data.positions),
-                  size: 2
-                },
-                getTimestamps: {
-                  value: new Float32Array(props.data.timestamps),
-                  size: 1
-                }
-              }
-            },
+            data: props.data,
+            getPath: d => d.map(p => p.slice(0, 2)),
+            getTimestamps: d => d.map(p => p.slice(2)),
             getColor: [253, 128, 93],
             getWidth: 3,
-            widthUnits: 'pixels',
+            widthUnits: "pixels",
             opacity: 0.7,
             rounded: true,
-            trailLength: 40,
+            trailLength: 50,
             currentTime: props.currentTime,
-            shadowEnabled: false,
-            _pathType: "open" // this instructs the layer to skip normalization and use the binary as-is
+            shadowEnabled: false
+            // If you get binary data working in the format Deck.gl expects,then
+            // uncomment this:
+            // _pathType: "open" // this instructs the layer to skip normalization and use the binary as-is
           });
         }
       })
