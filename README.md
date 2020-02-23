@@ -295,9 +295,9 @@ aws s3 cp \
 
 The schedule component is my favorite part of the project. You can see streaks
 moving around that correspond to transit vehicles: trains, buses, ferries. This
-data is _not simulated_, it takes actual schedule information from the
-Transitland API and matches it to route geometries. (Though it's not real-time
-info).
+data comes from actual schedule information from the Transitland API and matches
+it to route geometries. (Though it's not real-time info, so it doesn't reflect
+delays).
 
 I use the deck.gl
 [`TripsLayer`](https://deck.gl/#/documentation/deckgl-api-reference/layers/trips-layer)
@@ -451,22 +451,23 @@ python code/tile/create_overview_tiles.py \
     --max-coords 150000
 ```
 
-Then compress these tiles
+Make gzipped protobuf files from these tiles:
 ```bash
-rm -rf data/ssp_geom_tiles_comp
-mkdir -p data/ssp_geom_tiles_comp
+rm -rf data/ssp/pbf
+mkdir -p data/ssp/pbf
 num_cpu=15
-# Compress tiles and write to data/ssp_geom_tiles_comp
-# This passes 2, 3, ... 13 to code/tile/compress_tiles.sh
-parallel -P $num_cpu bash code/tile/compress_tiles.sh ::: {2..13}
+for zoom in {10..13}; do
+    find data/ssp/tiles/${zoom} -type f -name '*.geojson' \
+        | parallel -P $num_cpu bash code/tile/compress_tiles_pbf.sh {}
+done
 ```
 
 Upload to AWS
 ```bash
 aws s3 cp \
-    data/ssp_geom_tiles_comp s3://data.kylebarron.dev/all-transit/schedule/4_16-20/ \
+    data/ssp/pbf s3://data.kylebarron.dev/all-transit/pbf/schedule/4_16-20/ \
     --recursive \
-    --content-type application/json \
+    --content-type application/x-protobuf \
     --content-encoding gzip \
     `# Set to public read access` \
     --acl public-read

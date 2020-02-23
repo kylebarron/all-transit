@@ -25,6 +25,8 @@ import {
   minScheduleAnimationZoom,
   minOperatorInfoZoom
 } from "./constants";
+import Protobuf from "pbf"
+import {ScheduleTile} from "../../schedule_tile"
 
 // You'll get obscure errors without including the Mapbox GL CSS
 import "../../css/mapbox-gl.css";
@@ -49,10 +51,6 @@ class Map extends React.Component {
     includeCablecar: true,
     time: 65391
   };
-
-  componentDidMount() {
-    this._animate();
-  }
 
   componentWillUnmount() {
     if (this._animationFrame) {
@@ -171,6 +169,26 @@ class Map extends React.Component {
     const { zoom } = viewState;
     const newState = { zoom: zoom };
 
+    // If now below minScheduleAnimationZoom and previously above it, stop
+    // animating
+    if (
+      zoom < minScheduleAnimationZoom &&
+      this.state.zoom >= minScheduleAnimationZoom
+    ) {
+      if (this._animationFrame) {
+        window.cancelAnimationFrame(this._animationFrame);
+      }
+    }
+
+    // If now above minScheduleAnimationZoom and previously below it, restart
+    // animating
+    if (
+      zoom >= minScheduleAnimationZoom &&
+      this.state.zoom < minScheduleAnimationZoom
+    ) {
+      this._animate();
+    }
+
     // Get operators in view
     if (zoom >= minOperatorInfoZoom) {
     const operatorFeatures = this.map.queryRenderedFeatures({
@@ -188,8 +206,28 @@ class Map extends React.Component {
     this.setState(newState);
   };
 
+  onReactMapGLLoad = () => {
+    const zoom = getInitialViewState(this.props.location).zoom || null;
+    if (zoom >= minOperatorInfoZoom) {
+      // Get operators in view
+      // NOTE: this often errors because while the _map_ has loaded, the
+      // operators layer hasn't yet.
+      const operatorFeatures = this.map.queryRenderedFeatures({
+        layers: ["transit_operators"]
+      });
+      const operators = operatorFeatures.map(feature => feature.properties);
+      this.setState({ operators: operators });
+    }
+
+    if (zoom >= minScheduleAnimationZoom) {
+      this._animate();
+    }
+  };
+
   _renderDeckLayers() {
-    const baseurl = "https://data.kylebarron.dev/all-transit/schedule/4_16-20";
+    // Should've named this better, but this is the current dir of json files
+    const baseurl =
+      "https://data.kylebarron.dev/all-transit/tmpjson/schedule/4_16-20";
 
     return [
       new TileLayer({
@@ -197,9 +235,12 @@ class Map extends React.Component {
         maxZoom: 13,
         visible: this.state.enableScheduleAnimation,
         getTileData: ({ x, y, z }) =>
-          fetch(`${baseurl}/${z}/${x}/${y}.json`).then(response =>
-            response.json()
-          ),
+          fetch(`${baseurl}/${z}/${x}/${y}.json`).then(response => {
+            if (response.status === 200) {
+              return response.json();
+            }
+            return null;
+          }),
 
         // this prop is passed on to the TripsLayer that's rendered as a
         // SubLayer. Otherwise, the TripsLayer can't access the state being
@@ -212,12 +253,16 @@ class Map extends React.Component {
             getPath: d => d.map(p => p.slice(0, 2)),
             getTimestamps: d => d.map(p => p.slice(2)),
             getColor: [253, 128, 93],
+            getWidth: 3,
+            widthUnits: "pixels",
             opacity: 0.7,
-            widthMinPixels: 3,
             rounded: true,
             trailLength: 50,
             currentTime: props.currentTime,
             shadowEnabled: false
+            // If you get binary data working in the format Deck.gl expects,then
+            // uncomment this:
+            // _pathType: "open" // this instructs the layer to skip normalization and use the binary as-is
           });
         }
       })
@@ -356,6 +401,9 @@ class Map extends React.Component {
           layers={this._renderDeckLayers()}
           pickingRadius={pickingRadius}
           onViewStateChange={this.onViewStateChange}
+          // Controls the resolution of drawing buffer used for rendering
+          // false: CSS pixels resolution (equal to the canvas size) is used for rendering
+          useDevicePixels={false}
         >
           <StaticMap
             ref={ref => {
@@ -363,6 +411,8 @@ class Map extends React.Component {
             }}
             mapStyle="https://raw.githubusercontent.com/kylebarron/fiord-color-gl-style/master/style.json"
             mapOptions={{ hash: true }}
+            onLoad={this.onReactMapGLLoad}
+            preventStyleDiffing
           >
             <TransitLayer
               highlightedRouteIds={highlightedRoutesOnestopIds}

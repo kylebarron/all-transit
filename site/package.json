@@ -49,6 +49,7 @@
     "gatsby-transformer-sharp": "^2.3.6",
     "gray-matter": "^4.0.2",
     "lodash": "^4.17.15",
+    "pbf": "^3.2.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-helmet": "5.2.1",
