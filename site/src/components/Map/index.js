@@ -169,6 +169,26 @@ class Map extends React.Component {
     const { zoom } = viewState;
     const newState = { zoom: zoom };
 
+    // If now below minScheduleAnimationZoom and previously above it, stop
+    // animating
+    if (
+      zoom < minScheduleAnimationZoom &&
+      this.state.zoom >= minScheduleAnimationZoom
+    ) {
+      if (this._animationFrame) {
+        window.cancelAnimationFrame(this._animationFrame);
+      }
+    }
+
+    // If now above minScheduleAnimationZoom and previously below it, restart
+    // animating
+    if (
+      zoom >= minScheduleAnimationZoom &&
+      this.state.zoom < minScheduleAnimationZoom
+    ) {
+      this._animate();
+    }
+
     // Get operators in view
     if (zoom >= minOperatorInfoZoom) {
     const operatorFeatures = this.map.queryRenderedFeatures({
@@ -189,7 +209,6 @@ class Map extends React.Component {
   onReactMapGLLoad = () => {
     const zoom = getInitialViewState(this.props.location).zoom || null;
     if (zoom >= minOperatorInfoZoom) {
-
       // Get operators in view
       // NOTE: this often errors because while the _map_ has loaded, the
       // operators layer hasn't yet.
