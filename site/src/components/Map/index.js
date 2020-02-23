@@ -40,7 +40,7 @@ class Map extends React.Component {
     enableScheduleAnimation: true,
     operators: [],
     operatorsDisabled: {},
-    zoom: getInitialViewState(this.props.location).zoom || null,
+    zoom: getInitialViewState(this.props.location).zoom || 0,
     includeTram: true,
     includeMetro: true,
     includeRail: true,
@@ -163,6 +163,17 @@ class Map extends React.Component {
     }));
   };
 
+  _updateOperators = zoom => {
+    // Get operators in view
+    if (zoom >= minOperatorInfoZoom) {
+      const operatorFeatures = this.map.queryRenderedFeatures({
+        layers: ["transit_operators"]
+      });
+      const operators = operatorFeatures.map(feature => feature.properties);
+      this.setState({ operators: operators });
+    }
+  };
+
   onViewStateChange = ({ viewState }) => {
     const { zoom } = viewState;
     const newState = { zoom: zoom };
@@ -188,13 +199,7 @@ class Map extends React.Component {
     }
 
     // Get operators in view
-    if (zoom >= minOperatorInfoZoom) {
-    const operatorFeatures = this.map.queryRenderedFeatures({
-      layers: ["transit_operators"]
-    });
-    const operators = operatorFeatures.map(feature => feature.properties);
-    newState["operators"] = operators;
-    }
+    this._updateOperators(zoom);
 
     // Reset highlighted objects when zooming out past minHighlightZoom
     if (zoom < minHighlightZoom) {
@@ -206,16 +211,10 @@ class Map extends React.Component {
 
   onReactMapGLLoad = () => {
     const zoom = getInitialViewState(this.props.location).zoom || null;
-    if (zoom >= minOperatorInfoZoom) {
-      // Get operators in view
-      // NOTE: this often errors because while the _map_ has loaded, the
+
+    // NOTE: this often errors here because while the _map_ has loaded, the
       // operators layer hasn't yet.
-      const operatorFeatures = this.map.queryRenderedFeatures({
-        layers: ["transit_operators"]
-      });
-      const operators = operatorFeatures.map(feature => feature.properties);
-      this.setState({ operators: operators });
-    }
+    this._updateOperators(zoom);
 
     if (zoom >= minScheduleAnimationZoom) {
       this._animate();
