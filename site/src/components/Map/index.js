@@ -25,8 +25,6 @@ import {
   minScheduleAnimationZoom,
   minOperatorInfoZoom
 } from "./constants";
-import Protobuf from "pbf"
-import {ScheduleTile} from "../../schedule_tile"
 
 // You'll get obscure errors without including the Mapbox GL CSS
 import "../../css/mapbox-gl.css";
