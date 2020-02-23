@@ -52,10 +52,6 @@ class Map extends React.Component {
     time: 65391
   };
 
-  componentDidMount() {
-    this._animate();
-  }
-
   componentWillUnmount() {
     if (this._animationFrame) {
       window.cancelAnimationFrame(this._animationFrame);
@@ -188,6 +184,25 @@ class Map extends React.Component {
       newState["highlightedRoutesOnestopIds"] = [];
     }
     this.setState(newState);
+  };
+
+  onReactMapGLLoad = () => {
+    const zoom = getInitialViewState(this.props.location).zoom || null;
+    if (zoom >= minOperatorInfoZoom) {
+
+      // Get operators in view
+      // NOTE: this often errors because while the _map_ has loaded, the
+      // operators layer hasn't yet.
+      const operatorFeatures = this.map.queryRenderedFeatures({
+        layers: ["transit_operators"]
+      });
+      const operators = operatorFeatures.map(feature => feature.properties);
+      this.setState({ operators: operators });
+    }
+
+    if (zoom >= minScheduleAnimationZoom) {
+      this._animate();
+    }
   };
 
   _renderDeckLayers() {
@@ -377,6 +392,8 @@ class Map extends React.Component {
             }}
             mapStyle="https://raw.githubusercontent.com/kylebarron/fiord-color-gl-style/master/style.json"
             mapOptions={{ hash: true }}
+            onLoad={this.onReactMapGLLoad}
+            preventStyleDiffing
           >
             <TransitLayer
               highlightedRouteIds={highlightedRoutesOnestopIds}
