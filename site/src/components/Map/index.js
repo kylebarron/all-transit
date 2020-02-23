@@ -23,7 +23,8 @@ import {
   pickingRadius,
   minHighlightZoom,
   minScheduleAnimationZoom,
-  minOperatorInfoZoom
+  minOperatorInfoZoom,
+  maxScheduleAnimationZoom
 } from "./constants";
 
 // You'll get obscure errors without including the Mapbox GL CSS
@@ -213,7 +214,7 @@ class Map extends React.Component {
     const zoom = getInitialViewState(this.props.location).zoom || null;
 
     // NOTE: this often errors here because while the _map_ has loaded, the
-      // operators layer hasn't yet.
+    // operators layer hasn't yet.
     this._updateOperators(zoom);
 
     if (zoom >= minScheduleAnimationZoom) {
@@ -229,7 +230,7 @@ class Map extends React.Component {
     return [
       new TileLayer({
         minZoom: minScheduleAnimationZoom,
-        maxZoom: 13,
+        maxZoom: maxScheduleAnimationZoom,
         visible: this.state.enableScheduleAnimation,
         getTileData: ({ x, y, z }) =>
           fetch(`${baseurl}/${z}/${x}/${y}.json`).then(response => {
@@ -280,18 +281,30 @@ class Map extends React.Component {
         key: "scheduleAnimation",
         title: "Schedule Animation",
         content: {
-          content:
-            zoom >= minScheduleAnimationZoom ? (
-            <div>
-              <Checkbox
-                label="Enable Animation"
-                onChange={() => this._toggleState("enableScheduleAnimation")}
-                checked={this.state.enableScheduleAnimation}
-              />
-            <p>Time: Friday {timeToStr(time)}</p>
+          content: (
+            <div style={{ "padding-left": 10, "padding-right": 10 }}>
+              {zoom >= minScheduleAnimationZoom ? (
+                <div>
+                  <Checkbox
+                    label="Enable Animation"
+                    onChange={() =>
+                      this._toggleState("enableScheduleAnimation")
+                    }
+                    checked={this.state.enableScheduleAnimation}
+                  />
+                  <p>Time: Friday {timeToStr(time)}</p>
+                  <p>
+                    Animation scale is 60x. One second in the animation
+                    represents one minute in real life.
+                  </p>
+                  {zoom < maxScheduleAnimationZoom && (
+                    <p>Animation uses simplified data at this zoom level.</p>
+                  )}
+                </div>
+              ) : (
+                <p>Zoom in to see schedule animation</p>
+              )}
             </div>
-            ) : (
-              <p>Zoom in to see schedule animation</p>
           )
         }
       },
@@ -300,24 +313,24 @@ class Map extends React.Component {
         title: "Operators",
         content: {
           content: (
-            <div>
+            <div style={{ "padding-left": 10, "padding-right": 10 }}>
               {zoom >= minOperatorInfoZoom ? (
-              <OperatorsList
-                operators={this.state.operators}
-                operatorsDisabled={this.state.operatorsDisabled}
-                onChange={operator_onestop_id => {
-                  this.setState(prevState => {
-                    const { operatorsDisabled } = prevState;
-                    const thisOperatorDisabled =
-                      operatorsDisabled[operator_onestop_id] || false;
-                    operatorsDisabled[
-                      operator_onestop_id
-                    ] = !thisOperatorDisabled;
+                <OperatorsList
+                  operators={this.state.operators}
+                  operatorsDisabled={this.state.operatorsDisabled}
+                  onChange={operator_onestop_id => {
+                    this.setState(prevState => {
+                      const { operatorsDisabled } = prevState;
+                      const thisOperatorDisabled =
+                        operatorsDisabled[operator_onestop_id] || false;
+                      operatorsDisabled[
+                        operator_onestop_id
+                      ] = !thisOperatorDisabled;
 
-                    return { operatorsDisabled: operatorsDisabled };
-                  });
-                }}
-              />
+                      return { operatorsDisabled: operatorsDisabled };
+                    });
+                  }}
+                />
               ) : (
                 <p>Zoom in to see local operators</p>
               )}
@@ -330,7 +343,8 @@ class Map extends React.Component {
         title: "Transit Modes",
         content: {
           content: (
-            <List>
+            <div style={{ "padding-left": 10, "padding-right": 10 }}>
+              <List>
                 {["Tram", "Metro", "Rail", "Bus", "Ferry", "Cablecar"].map(
                   mode => (
                     <List.Item>
@@ -342,7 +356,8 @@ class Map extends React.Component {
                     </List.Item>
                   )
                 )}
-            </List>
+              </List>
+            </div>
           )
         }
       },
@@ -351,7 +366,13 @@ class Map extends React.Component {
         title: "Other Options",
         content: {
           content: (
-            <div>
+            <div
+              style={{
+                "padding-left": 10,
+                "padding-right": 10,
+                "padding-bottom": 10
+              }}
+            >
               {zoom < minHighlightZoom ? (
                 <Checkbox
                   disabled
