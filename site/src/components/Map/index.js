@@ -292,13 +292,19 @@ class Map extends React.Component {
                     }
                     checked={this.state.enableScheduleAnimation}
                   />
+                  {this.state.enableScheduleAnimation && (
+                    <div>
                   <p>Time: Friday {timeToStr(time)}</p>
                   <p>
                     Animation scale is 60x. One second in the animation
                     represents one minute in real life.
                   </p>
                   {zoom < maxScheduleAnimationZoom && (
-                    <p>Animation uses simplified data at this zoom level.</p>
+                        <p>
+                          Animation uses simplified data at this zoom level.
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
               ) : (
