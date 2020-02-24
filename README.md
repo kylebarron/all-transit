@@ -57,9 +57,7 @@ Download all operators whose service area intersects the continental US, and
 then extract their identifiers.
 ```bash
 # All operators
-transitland operators \
-    --geometry data/gis/states/states.shp \
-    > data/operators.geojson
+transitland operators --page-all > data/operators_new.geojson
 
 # All operator `onestop_id`s
 cat data/operators.geojson \
@@ -78,16 +76,14 @@ download again, I'd just download routes by operator to begin with.
 
 ```bash
 # All routes
-transitland routes \
-    --geometry data/gis/states/states.shp \
-    > data/routes.geojson
-
-# Split these routes into different files by operator
-mkdir -p data/routes/
+rm -rf data/routes
+mkdir -p data/routes
 cat data/operator_onestop_ids.txt | while read operator_id
 do
-    cat data/routes.geojson \
-        | jq -c "if .properties.operated_by_onestop_id == \"$operator_id\" then . else empty end" \
+    transitland routes \
+        --page-all \
+        --operated-by $operator_id \
+        --per-page 1000 \
         > data/routes/$operator_id.geojson
 done
 ```
@@ -95,19 +91,25 @@ done
 Now that the routes are downloaded, I extract the identifiers for all
 `RouteStopPattern`s and `Route`s.
 ```bash
-# All route stop patterns `onestop_id`s for those routes:
-cat data/routes.geojson \
-    | jq '.properties.route_stop_patterns_by_onestop_id[]' \
-    | uniq \
-    | tr -d \" \
-    > data/route_stop_patterns_by_onestop_id.txt
+mkdir -p data/route_stop_patterns_by_onestop_id/
+cat data/operator_onestop_ids.txt | while read operator_id
+do
+    cat data/routes/$operator_id.geojson \
+        | jq '.properties.route_stop_patterns_by_onestop_id[]' \
+        | uniq \
+        | tr -d \" \
+        > data/route_stop_patterns_by_onestop_id/$operator_id.txt
+done
 
-# All route onestop_ids
-cat data/routes.geojson \
-    | jq '.properties.onestop_id' \
-    | uniq \
-    | tr -d \" \
-    > data/routes_onestop_ids.txt
+mkdir -p data/routes_onestop_ids/
+cat data/operator_onestop_ids.txt | while read operator_id
+do
+    cat data/routes/$operator_id.geojson \
+        | jq '.properties.onestop_id' \
+        | uniq \
+        | tr -d \" \
+        > data/routes_onestop_ids/$operator_id.txt
+done
 ```
 
 In order to split up how I later call the `ScheduleStopPairs` API endpoint, I
@@ -144,24 +146,14 @@ downloading these again, I'd write each `Stops` response into a file named by
 operator.
 ```bash
 # All stops
-rm data/stops.geojson
-cat data/operator_onestop_ids.txt | while read operator_id
+rm -rf data/stops
+mkdir -p data/stops
+cat data/operator_onestop_ids_new.txt | while read operator_id
 do
     transitland stops \
+        --page-all \
         --served-by $operator_id \
         --per-page 1000 \
-        >> data/stops.geojson
-done
-
-# Split these stops into different files by operator
-# NOTE: Again, if I were doing this again, I'd just write into individual files
-# in the above step, but I didn't want to spend more time calling the API
-# server.
-mkdir -p data/stops/
-cat data/operator_onestop_ids.txt | while read operator_id
-do
-    cat data/stops.geojson \
-        | jq -c "if .properties.operators_serving_stop | any(.operator_onestop_id == \"$operator_id\") then . else empty end" \
         > data/stops/$operator_id.geojson
 done
 ```
@@ -178,10 +170,14 @@ to `Route`s, but I found that some `ScheduleStopPair` have missing
 `RouteStopPattern`s, while `Route` is apparently never missing.
 
 ```bash
-# All route-stop-patterns (completed relatively quickly, overnight)
-transitland onestop-id \
-    --file data/route_stop_patterns_by_onestop_id.txt \
-    > data/route-stop-patterns.json
+mkdir -p data/route_stop_patterns/
+cat data/operator_onestop_ids.txt | while read operator_id
+do
+    transitland onestop-id \
+        --page-all \
+        --file data/route_stop_patterns_by_onestop_id/$operator_id.txt \
+        > data/route_stop_patterns/$operator_id.json
+done
 ```
 
 #### Schedule Stop Pairs
@@ -202,12 +198,26 @@ sure each portion was correctly downloaded.
 ```bash
 # All schedule-stop-pairs
 # Best to loop over route_id, not operator_id
-rm data/ssp.json
 mkdir -p data/ssp/
+cat data/operator_onestop_ids_new.txt | while read operator_id
+do
+    cat data/routes_onestop_ids/$operator_id.txt | while read route_id
+    do
+        transitland schedule-stop-pairs \
+            --page-all \
+            --route-onestop-id $route_id \
+            --per-page 1000 \
+            --active \
+            | gzip >> data/ssp/$operator_id.json.gz
+        touch data/ssp/$operator_id.finished
+    done
+done
+
 for i in {1..5}; do
     cat data/routes_onestop_ids_${i}.txt | while read route_id
     do
         transitland schedule-stop-pairs \
+        --page-all \
         --route-onestop-id $route_id \
         --per-page 1000 --active \
         | gzip >> data/ssp/ssp${i}.json.gz
@@ -228,18 +238,19 @@ In order to keep the size of the vector tiles small:
   that it passes at zoom 11
 
 ```bash
-# Writes mbtiles to data/routes.mbtiles
+# Writes mbtiles to data/mbtiles/routes.mbtiles
 # The -c is important so that each feature gets output onto a single line
-cat data/routes.geojson \
+find data/routes -type f -name '*.geojson' -exec cat {} \; \
+    `# Apply jq filter at code/jq/routes.jq` \
     | jq -c -f code/jq/routes.jq \
     | bash code/tippecanoe/routes.sh
 
-# Writes mbtiles to data/operators.mbtiles
+# Writes mbtiles to data/mbtiles/operators.mbtiles
 bash code/tippecanoe/operators.sh data/operators.geojson
 
-# Writes mbtiles to data/stops.mbtiles
+# Writes mbtiles to data/mbtiles/stops.mbtiles
 # The -c is important so that each feature gets output onto a single line
-cat data/stops.geojson \
+find data/stops -type f -name '*.geojson' -exec cat {} \; \
     | jq -c -f code/jq/stops.jq \
     | bash code/tippecanoe/stops.sh
 ```
@@ -247,10 +258,16 @@ cat data/stops.geojson \
 Combine into single mbtiles
 ```bash
 tile-join \
-    -o data/all.mbtiles \
+    -o data/mbtiles/all.mbtiles \
+    `# Don't enforce size limits;` \
+    `# Size limits already enforced individually for each sublayer` \
     --no-tile-size-limit \
+    `# Overwrite existing mbtiles` \
     --force \
-    data/stops.mbtiles data/operators.mbtiles data/routes.mbtiles
+    `# Input files` \
+    data/mbtiles/stops.mbtiles \
+    data/mbtiles/operators.mbtiles \
+    data/mbtiles/routes.mbtiles
 ```
 
 Then publish! Host on a small server with
@@ -390,7 +407,7 @@ that I can pass to my Python script 1) `ScheduleStopPair`s pertaining to a
 route, 2) `Stops` by operator and 3) `Routes` by operator.
 ```bash
 # Make xw with route_id: operator_id
-cat data/routes.geojson \
+cat data/routes/*.geojson \
     | jq -c '{route_id: .properties.onestop_id, operator_id: .properties.operated_by_onestop_id}' \
     > data/route_operator_xw.json
 ```
@@ -417,21 +434,21 @@ Here's the meat of connecting schedules to route geometries. The bash script cal
 
 ```bash
 # Loop over _routes_
-num_cpu=15
+num_cpu=12
 for i in {1..5}; do
     cat data/routes_onestop_ids_${i}.txt \
         | parallel -P $num_cpu bash code/schedules/ssp_geom.sh {}
 done
 ```
 
-Now in `data/ssp_geom` I have a newline-delimited GeoJSON file for every route.
+Now in `data/ssp/geom` I have a newline-delimited GeoJSON file for every route.
 I take all these individual features and cut them into individual tiles for a
 zoom that has all the original data with no simplification, which I currently
 have as zoom 13.
 ```bash
-rm -rf data/ssp_geom_tiles
-mkdir -p data/ssp_geom_tiles
-find data/ssp_geom/ -type f -name 'r-*.geojson' -exec cat {} \; \
+rm -rf data/ssp/tiles
+mkdir -p data/ssp/tiles
+find data/ssp/geom/ -type f -name 'r-*.geojson' -exec cat {} \; \
     | uniq \
     | python code/tile/tile_geojson.py \
             `# Set minimum and maximum tile zooms` \
@@ -439,25 +456,25 @@ find data/ssp_geom/ -type f -name 'r-*.geojson' -exec cat {} \; \
             `# Only keep LineStrings` \
             --allowed-geom-type 'LineString' \
             `# Write tiles into the following root dir` \
-            -d data/ssp_geom_tiles
+            -d data/ssp/tiles
 ```
 
 Create overview tiles for lower zooms
 ```bash
 python code/tile/create_overview_tiles.py \
-    --min-zoom 2 \
+    --min-zoom 10 \
     --existing-zoom 13 \
-    --tile-dir data/ssp_geom_tiles \
+    --tile-dir data/ssp/tiles \
     --max-coords 150000
 ```
 
 Make gzipped protobuf files from these tiles:
 ```bash
-rm -rf data/ssp/pbf
-mkdir -p data/ssp/pbf
+rm -rf data_us/ssp/pbf
+mkdir -p data_us/ssp/pbf
 num_cpu=15
 for zoom in {10..13}; do
-    find data/ssp/tiles/${zoom} -type f -name '*.geojson' \
+    find data_us/ssp_geom_tiles/${zoom} -type f -name '*.geojson' \
         | parallel -P $num_cpu bash code/tile/compress_tiles_pbf.sh {}
 done
 ```
@@ -465,10 +482,29 @@ done
 Upload to AWS
 ```bash
 aws s3 cp \
-    data/ssp/pbf s3://data.kylebarron.dev/all-transit/pbf/schedule/4_16-20/ \
+    data/ssp/pbf/13 s3://data.kylebarron.dev/all-transit/pbfv2/schedule/4_16-20/13 \
     --recursive \
     --content-type application/x-protobuf \
     --content-encoding gzip \
     `# Set to public read access` \
+    --acl public-read
+```
+
+## Feed Attribution
+
+Several data providers wish to be accredited when you use their data.
+
+Download all feed information:
+
+```bash
+transitland feeds --page-all > data/feeds.geojson
+python code/generate_attribution.py data/feeds.geojson \
+    | gzip \
+    > data/attribution.json.gz
+aws s3 cp \
+    data/attribution.json.gz \
+    s3://data.kylebarron.dev/all-transit/attribution.json \
+    --content-type application/json \
+    --content-encoding gzip \
     --acl public-read
 ```

@@ -3,7 +3,7 @@
 # If no input file is provided; GeoJSON must be stdin
 input=$1
 
-mkdir -p data/
+mkdir -p data/mbtiles/
 tippecanoe \
     `# tileset name` \
     -n 'Transit stops' \
@@ -21,6 +21,6 @@ tippecanoe \
     `# overwrite` \
     --force \
     `# Export path` \
-    -o data/stops.mbtiles \
+    -o data/mbtiles/stops.mbtiles \
     `# Input geojson` \
     $input

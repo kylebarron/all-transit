@@ -1,3 +1,5 @@
+*.mbtiles
+data_archive/
 tmp/
 tmp
 *.geojson

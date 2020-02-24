@@ -3,7 +3,7 @@
 # If no input file is provided; GeoJSON must be stdin
 input=$1
 
-mkdir -p data/
+mkdir -p data/mbtiles/
 tippecanoe \
     `# tileset name` \
     -n 'Transit operators' \
@@ -22,13 +22,17 @@ tippecanoe \
     --include='name' \
     --include='short_name' \
     --include='website' \
-    `# Set maximum zoom to 10` \
+    `# Set minimum and maximum zoom` \
     --maximum-zoom=11 \
-    `# Set minimum zoom to 0` \
-    --minimum-zoom=0 \
+    --minimum-zoom=9 \
     `# overwrite` \
     --force \
+    `# Set polygon simplification level` \
+    `# Since I'm only not actually displaying the polygons, this can go pretty high` \
+    --simplification=50 \
+    `# Set maximum tile size to 100KB` \
+    --maximum-tile-bytes=102400 \
     `# Export path` \
-    -o data/operators.mbtiles \
+    -o data/mbtiles/operators.mbtiles \
     `# Input geojson` \
     $input
