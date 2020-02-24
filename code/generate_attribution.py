@@ -4,15 +4,10 @@ import click
 
 
 @click.command()
-@click.argument('file', type=click.file())
+@click.argument('file', type=click.File())
 def main(file):
     attributions = []
-    lines = file.readlines()
-
-    # lines = (l for l in lines)
-    # d = json.loads(next(lines))
-    # d['properties']['license']['use_without_attribution']
-    for line in lines:
+    for line in file:
         d = json.loads(line)
         attribution = generate_attr(d)
 
