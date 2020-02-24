@@ -6,7 +6,7 @@ import {
   _MapContext as MapContext,
   NavigationControl
 } from "react-map-gl";
-import { getInitialViewState, timeToStr } from "./utils";
+import { getInitialViewState, timeToStr, insideBounds } from "./utils";
 import {
   Container,
   Accordion,
@@ -25,7 +25,8 @@ import {
   minHighlightZoom,
   minScheduleAnimationZoom,
   minOperatorInfoZoom,
-  maxScheduleAnimationZoom
+  maxScheduleAnimationZoom,
+  usBounds
 } from "./constants";
 
 // You'll get obscure errors without including the Mapbox GL CSS
@@ -46,6 +47,8 @@ class Map extends React.Component {
     operators: [],
     operatorsDisabled: {},
     zoom: getInitialViewState(this.props.location).zoom || 0,
+    lon: getInitialViewState(this.props.location).longitude || 0,
+    lat: getInitialViewState(this.props.location).latitude || 0,
     includeTram: true,
     includeMetro: true,
     includeRail: true,
@@ -178,9 +181,9 @@ class Map extends React.Component {
   };
 
   onViewStateChange = ({ viewState }) => {
-    const { zoom } = viewState;
+    const { zoom, latitude, longitude } = viewState;
     const { accordionActiveIndex } = this.state;
-    this.setState({ zoom: zoom });
+    this.setState({ zoom: zoom, lat: latitude, lon: longitude });
 
     // If now below minScheduleAnimationZoom and previously above it, stop
     // animating
@@ -286,6 +289,8 @@ class Map extends React.Component {
       highlightedRoutesOnestopIds,
       zoom,
       time,
+      lon,
+      lat,
       accordionActiveIndex
     } = this.state;
 
@@ -296,32 +301,36 @@ class Map extends React.Component {
         content: {
           content: (
             <div style={{ paddingLeft: 10, paddingRight: 10 }}>
-              {zoom >= minScheduleAnimationZoom ? (
-                <div>
-                  <Checkbox
-                    label="Enable Animation"
-                    onChange={() =>
-                      this._toggleState("enableScheduleAnimation")
-                    }
-                    checked={this.state.enableScheduleAnimation}
-                  />
-                  {this.state.enableScheduleAnimation && (
-                    <div>
-                      <p>Time: Friday {timeToStr(time)}</p>
-                      <p>
-                        Animation scale is 60x. One second in the animation
-                        represents one minute in real life.
-                      </p>
-                      {zoom < maxScheduleAnimationZoom && (
+              {insideBounds(lon, lat, usBounds) ? (
+                zoom >= minScheduleAnimationZoom ? (
+                  <div>
+                    <Checkbox
+                      label="Enable Animation"
+                      onChange={() =>
+                        this._toggleState("enableScheduleAnimation")
+                      }
+                      checked={this.state.enableScheduleAnimation}
+                    />
+                    {this.state.enableScheduleAnimation && (
+                      <div>
+                        <p>Time: Friday {timeToStr(time)}</p>
                         <p>
-                          Animation uses simplified data at this zoom level.
+                          Animation scale is 60x. One second in the animation
+                          represents one minute in real life.
                         </p>
-                      )}
-                    </div>
-                  )}
-                </div>
+                        {zoom < maxScheduleAnimationZoom && (
+                          <p>
+                            Animation uses simplified data at this zoom level.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p>Zoom in to a city to see schedule animation</p>
+                )
               ) : (
-                <p>Zoom in to see schedule animation</p>
+                <p>Schedule animation only currently available for the U.S.</p>
               )}
             </div>
           )

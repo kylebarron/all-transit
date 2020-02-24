@@ -12,3 +12,6 @@ export const minOperatorInfoZoom = 9;
 
 // Max zoom for which data exists for Schedule Animation
 export const maxScheduleAnimationZoom = 13;
+
+// Wide bounding box around lower 48 U.S.
+export const usBounds = [-138.24, 8.04, -55.58, 56.29];

@@ -66,3 +66,11 @@ export function timeToStr(time) {
   const timeString = date.toLocaleTimeString("en-US", dateOptions);
   return timeString;
 }
+
+export function insideBounds(lon, lat, bounds) {
+  const [minx, miny, maxx, maxy] = bounds;
+  if (minx <= lon && lon <= maxx && miny <= lat && lat <= maxy) {
+    return true;
+  }
+  return false;
+}
