@@ -27,6 +27,7 @@ import {
   minOperatorInfoZoom,
   maxScheduleAnimationZoom
 } from "./constants";
+import DeckWorker from './deckAttributes.worker.js'
 
 // You'll get obscure errors without including the Mapbox GL CSS
 import "../../css/mapbox-gl.css";
@@ -54,6 +55,16 @@ class Map extends React.Component {
     includeCablecar: true,
     time: 65391
   };
+
+  componentDidMount = () => {
+    this.worker = typeof window === "object" && new DeckWorker();
+
+    // if (window.Worker) {
+    //   // this.worker.postMessage(['hello world'])
+    //   this.worker.helloworld('test')
+    //   console.log('message posted to worker')
+    // }
+  }
 
   componentWillUnmount = () => {
     if (this._animationFrame) {
@@ -231,13 +242,7 @@ class Map extends React.Component {
         minZoom: minScheduleAnimationZoom,
         maxZoom: maxScheduleAnimationZoom,
         visible: this.state.enableScheduleAnimation,
-        getTileData: ({ x, y, z }) =>
-          fetch(`${baseurl}/${z}/${x}/${y}.json`).then(response => {
-            if (response.status === 200) {
-              return response.json();
-            }
-            return [];
-          }),
+        getTileData: xyz => this.worker.getTileData(xyz),
 
         // this prop is passed on to the TripsLayer that's rendered as a
         // SubLayer. Otherwise, the TripsLayer can't access the state being
