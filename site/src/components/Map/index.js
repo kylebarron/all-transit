@@ -15,7 +15,7 @@ import {
   Grid,
   List,
   Icon,
-  Header,
+  Header
 } from "semantic-ui-react";
 import { TransitLayer, interactiveLayerIds } from "./TransitLayer";
 import { OperatorsList } from "./OperatorsList";
@@ -177,29 +177,21 @@ class Map extends React.Component {
     }
   };
 
-  onViewStateChange = ({ viewState, oldViewState }) => {
+  onViewStateChange = ({ viewState }) => {
     const { zoom } = viewState;
-    const { oldZoom = zoom } = oldViewState;
-    const newState = { zoom: zoom };
     const { accordionActiveIndex } = this.state;
+    this.setState({ zoom: zoom });
 
     // If now below minScheduleAnimationZoom and previously above it, stop
     // animating
-    if (
-      zoom < minScheduleAnimationZoom &&
-      oldZoom >= minScheduleAnimationZoom
-    ) {
-      if (this._animationFrame) {
-        window.cancelAnimationFrame(this._animationFrame);
-      }
+    if (zoom < minScheduleAnimationZoom && this._animationFrame) {
+      window.cancelAnimationFrame(this._animationFrame);
+      this._animationFrame = null;
     }
 
     // If now above minScheduleAnimationZoom and previously below it, restart
     // animating
-    if (
-      zoom >= minScheduleAnimationZoom &&
-      oldZoom < minScheduleAnimationZoom
-    ) {
+    if (zoom >= minScheduleAnimationZoom && !this._animationFrame) {
       this._animate();
     }
 
@@ -209,10 +201,11 @@ class Map extends React.Component {
 
     // Reset highlighted objects when zooming out past minHighlightZoom
     if (zoom < minHighlightZoom) {
-      newState["highlightedStopsOnestopIds"] = [];
-      newState["highlightedRoutesOnestopIds"] = [];
+      this.setState({
+        highlightedStopsOnestopIds: [],
+        highlightedRoutesOnestopIds: []
+      });
     }
-    this.setState(newState);
   };
 
   onReactMapGLLoad = () => {
