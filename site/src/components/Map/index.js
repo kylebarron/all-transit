@@ -371,7 +371,7 @@ class Map extends React.Component {
               <List>
                 {["Tram", "Metro", "Rail", "Bus", "Ferry", "Cablecar"].map(
                   mode => (
-                    <List.Item>
+                    <List.Item key={mode}>
                       <Checkbox
                         label={`${mode}`}
                         onChange={() => this._toggleState(`include${mode}`)}
