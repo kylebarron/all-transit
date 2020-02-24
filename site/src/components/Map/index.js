@@ -54,13 +54,13 @@ class Map extends React.Component {
     time: 65391
   };
 
-  componentWillUnmount() {
+  componentWillUnmount = () => {
     if (this._animationFrame) {
       window.cancelAnimationFrame(this._animationFrame);
     }
-  }
+  };
 
-  _animate() {
+  _animate = () => {
     const {
       // unit corresponds to the timestamp in source data
       // My trip timestamps are in seconds between 4pm and 8pm => 14400 seconds
@@ -90,10 +90,8 @@ class Map extends React.Component {
     const time =
       ((timestamp % loopSegments) / loopSegments) * loopLength + secondsStart;
     this.setState({ time: time });
-    this._animationFrame = window.requestAnimationFrame(
-      this._animate.bind(this)
-    );
-  }
+    this._animationFrame = window.requestAnimationFrame(this._animate);
+  };
 
   // Called on click by deck.gl
   // event.x, event.y are the clicked x and y coordinates in pixels
@@ -228,7 +226,7 @@ class Map extends React.Component {
     }
   };
 
-  _renderDeckLayers() {
+  _renderDeckLayers = () => {
     // Should've named this better, but this is the current dir of json files
     const baseurl =
       "https://data.kylebarron.dev/all-transit/tmpjson/schedule/4_16-20";
@@ -271,7 +269,7 @@ class Map extends React.Component {
         }
       })
     ];
-  }
+  };
 
   _handleAccordionTitleClick = (e, itemProps) => {
     const { index } = itemProps;
