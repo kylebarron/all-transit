@@ -6,9 +6,13 @@
 
 [Website: https://kylebarron.dev/all-transit](https://kylebarron.dev/all-transit)
 
-All transit in the continental US, as reported by the [Transitland
-database](https://transit.land). Inspired by [_All
-Streets_](https://benfry.com/allstreets/map5.html).
+All transit, as reported by the [Transitland][transitland] database. Inspired by
+[_All Streets_][all_streets]. I have a blog post [here][blog_post] detailing
+more information about the project.
+
+[transitland]: https://transit.land
+[all_streets]: https://benfry.com/allstreets/map5.html
+[blog_post]: https://kylebarron.dev/blog/all-transit
 
 ## Website
 
@@ -412,25 +416,19 @@ cat data/routes/*.geojson \
     > data/route_operator_xw.json
 ```
 
-Here's the meat of connecting schedules to route geometries. The bash script calls `code/schedules/ssp_geom.py`, and the general process of that script is:
+Here's the meat of connecting schedules to route geometries. The bash script
+calls `code/schedules/ssp_geom.py`, and the general process of that script is:
 
-1. Load stops and routes for the operator in dictionaries
+1. Load stops, routes, and route stop patterns for the operator
 2. Load provided `ScheduleStopPair`s from stdin
-3. Iterate over every `ScheduleStopPair`, call this `ssp`:
-    1. Find the starting and ending stops of the `ssp`, and record their `Point` geometries.
-    2. Find the route the `ssp` corresponds to and record its geometry.
-    3. For the starting and ending stops, find the closest point on the route.
-        Sometimes the route will actually be a `MultiLineString`, in which case
-        I try to keep the `LineString` that's closest to both the starting and
-        ending stops.
-    4. Now that I have a single `LineString`, split it by the starting and
-        ending stops, so that I have only the part of the route between those
-        two stops.
-    5. Get the time at which the vehicle leaves the start stop and at which it
-        arrives at the destination stop. Then linearly interpolate this along
-        every coordinate of the `LineString`. This way, the finalized
-        `LineString`s have the same geometry as the original routes, and every
-        coordinate has a time.
+3. Iterate over every `ScheduleStopPair`. For each pair, try to find the route stop pattern it's associated with. If it exists, use the linear stop distances contained in the `ScheduleStopPair` and Shapely's linear referencing methods to take the substring of that `LineString`.
+4. If a route stop pattern isn't found directly, find the associated route, then find its associate route stop patterns, then try taking a substring of each of those, checking that the start/end points are very close to the start/end stops.
+5. As a fallback, skip route stop patterns entirely. Find the starting/ending `Point`s; find the nearest point on the route for each of those points, and take the line between them.
+5. Get the time at which the vehicle leaves the start stop and at which it
+    arrives at the destination stop. Then linearly interpolate this along
+    every coordinate of the `LineString`. This way, the finalized
+    `LineString`s have the same geometry as the original routes, and every
+    coordinate has a time.
 
 ```bash
 # Loop over _routes_

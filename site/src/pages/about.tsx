@@ -131,7 +131,7 @@ class AboutPage extends React.Component {
         that there's no way to reliably guess how the transit vehicle travels
         between the two points, and so it shows up in the data as a straight
         line.
-        {/* <Header as="h4">
+        <Header as="h4">
           <Header.Content>How does it work?</Header.Content>
         </Header>
         <p>
@@ -139,7 +139,7 @@ class AboutPage extends React.Component {
           <a href="https://kylebarron.dev/blog/all-transit">here</a> that goes
           into more detail about the behind-the-scenes work that makes
           everything work.
-        </p> */}
+        </p>
         <Header as="h3">
           <Header.Content>Download the data</Header.Content>
         </Header>
