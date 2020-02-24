@@ -34,6 +34,7 @@ const mapStyle = require("./style.json");
 
 class Map extends React.Component {
   state = {
+    accordionActiveIndex: -1,
     optionsExpanded: false,
     highlightStopsByRoute: false,
     highlightRoutesByStop: false,
@@ -180,6 +181,7 @@ class Map extends React.Component {
   onViewStateChange = ({ viewState }) => {
     const { zoom } = viewState;
     const newState = { zoom: zoom };
+    const { accordionActiveIndex } = this.state;
 
     // If now below minScheduleAnimationZoom and previously above it, stop
     // animating
@@ -202,7 +204,8 @@ class Map extends React.Component {
     }
 
     // Get operators in view
-    this._updateOperators(zoom);
+    // Only update if accordion is open to operators list
+    if (accordionActiveIndex === 1) this._updateOperators(zoom);
 
     // Reset highlighted objects when zooming out past minHighlightZoom
     if (zoom < minHighlightZoom) {
@@ -214,10 +217,11 @@ class Map extends React.Component {
 
   onReactMapGLLoad = () => {
     const zoom = getInitialViewState(this.props.location).zoom || null;
+    const { accordionActiveIndex } = this.state;
 
     // NOTE: this often errors here because while the _map_ has loaded, the
     // operators layer hasn't yet.
-    this._updateOperators(zoom);
+    if (accordionActiveIndex === 1) this._updateOperators(zoom);
 
     if (zoom >= minScheduleAnimationZoom) {
       this._animate();
@@ -269,13 +273,27 @@ class Map extends React.Component {
     ];
   }
 
+  _handleAccordionTitleClick = (e, itemProps) => {
+    const { index } = itemProps;
+    const { accordionActiveIndex } = this.state;
+    const newIndex = accordionActiveIndex === index ? -1 : index;
+
+    if (newIndex == 1) {
+      const { zoom } = this.state;
+      this._updateOperators(zoom);
+    }
+
+    this.setState({ accordionActiveIndex: newIndex });
+  };
+
   render() {
     const { location } = this.props;
     const {
       highlightedStopsOnestopIds,
       highlightedRoutesOnestopIds,
       zoom,
-      time
+      time,
+      accordionActiveIndex
     } = this.state;
 
     const optionsPanels = [
@@ -501,7 +519,13 @@ class Map extends React.Component {
                   </Link>
                 </Card.Meta>
                 <Card.Description>
-                  <Accordion fluid styled panels={optionsPanels} />
+                  <Accordion
+                    activeIndex={accordionActiveIndex}
+                    fluid
+                    styled
+                    panels={optionsPanels}
+                    onTitleClick={this._handleAccordionTitleClick}
+                  />
                 </Card.Description>
               </Accordion.Content>
             </Card.Content>
