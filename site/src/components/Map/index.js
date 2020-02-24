@@ -300,7 +300,7 @@ class Map extends React.Component {
         title: "Schedule Animation",
         content: {
           content: (
-            <div style={{ "padding-left": 10, "padding-right": 10 }}>
+            <div style={{ "paddingLeft": 10, "paddingRight": 10 }}>
               {zoom >= minScheduleAnimationZoom ? (
                 <div>
                   <Checkbox
@@ -337,7 +337,7 @@ class Map extends React.Component {
         title: "Operators",
         content: {
           content: (
-            <div style={{ "padding-left": 10, "padding-right": 10 }}>
+            <div style={{ "paddingLeft": 10, "paddingRight": 10 }}>
               {zoom >= minOperatorInfoZoom ? (
                 <OperatorsList
                   operators={this.state.operators}
@@ -367,7 +367,7 @@ class Map extends React.Component {
         title: "Transit Modes",
         content: {
           content: (
-            <div style={{ "padding-left": 10, "padding-right": 10 }}>
+            <div style={{ "paddingLeft": 10, "paddingRight": 10 }}>
               <List>
                 {["Tram", "Metro", "Rail", "Bus", "Ferry", "Cablecar"].map(
                   mode => (
@@ -392,9 +392,9 @@ class Map extends React.Component {
           content: (
             <div
               style={{
-                "padding-left": 10,
-                "padding-right": 10,
-                "padding-bottom": 10
+                "paddingLeft": 10,
+                "paddingRight": 10,
+                "paddingBottom": 10
               }}
             >
               {zoom < minHighlightZoom ? (
