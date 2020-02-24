@@ -17,6 +17,58 @@ const AttributionItem = props => {
   );
 };
 
+const dataFiles = [
+  {
+    key: "Operators",
+    href:
+      "https://data.kylebarron.dev/all-transit/archive/2020_02/operators.geojson.gz",
+    desc:
+      "A transit agency that offers services to the general public along fixed routes",
+    size: "4 MB"
+  },
+  {
+    key: "Routes",
+    href:
+      "https://data.kylebarron.dev/all-transit/archive/2020_02/routes.tar.gz",
+    desc:
+      "All information about a single transit service as defined by the transit agency. A Route may have forks and thus may not be a single continuous line.",
+    size: "200 MB"
+  },
+  {
+    key: "Route Stop Patterns",
+    href:
+      "https://data.kylebarron.dev/all-transit/archive/2020_02/route_stop_patterns.tar.gz",
+    desc: "Routes split into individual linear geometries.",
+    size: "450 MB"
+  },
+  {
+    key: "Stops",
+    href:
+      "https://data.kylebarron.dev/all-transit/archive/2020_02/stops.tar.gz",
+    desc:
+      "Each point along a Route or Route Stop Pattern where passengers may get on or off.",
+    size: "100 MB"
+  }
+];
+
+const DataDownloadsList = () => {
+  return (
+    <List divided relaxed>
+      {dataFiles.map(item => (
+        <List.Item key={item.key}>
+          <List.Icon name="download" size="large" verticalAlign="middle" />
+          <List.Content>
+            <List.Header as="a" href={item.href} target="blank">
+              {item.key}{' '}({item.size})
+            </List.Header>
+            <List.Description>{item.desc}</List.Description>
+          </List.Content>
+        </List.Item>
+      ))}
+    </List>
+  );
+};
+
 class AboutPage extends React.Component {
   state = {
     attributionData: null
@@ -47,24 +99,70 @@ class AboutPage extends React.Component {
           </Header>
         </Segment>
         <Segment vertical>
-          <p>This starter was created by @fabien0102.</p>
           <p>
-            For any question, I'm on{" "}
-            <a href="https://discord.gg/2bz8EzW" target="blank">
-              discord #reactiflux/gatsby
+            This website was created by{" "}
+            <a href="https://kylebarron.dev" target="blank">
+              Kyle Barron
             </a>
           </p>
           <p>
-            For any issues, any PR are welcoming
-            <a
-              href="https://github.com/fabien0102/gatsby-starter/issues"
-              target="blank"
-            >
-              {" "}
-              on this repository
+            The code to generate this website is{" "}
+            <a href="https://github.com/kylebarron/all-transit" target="blank">
+              on Github
             </a>
           </p>
         </Segment>
+        <Header as="h3">
+          <Header.Content>How does it work?</Header.Content>
+        </Header>
+        <p>
+          I have a blog post{" "}
+          <a href="https://kylebarron.dev/blog/all-transit">here</a> that goes
+          into more detail about the behind-the-scenes work that makes
+          everything work.
+        </p>
+
+        <Header as="h3">
+          <Header.Content>Download the data</Header.Content>
+        </Header>
+        <p>
+          The Transitland database currently doesn't offer bulk downloads, so it
+          takes a while to download data for the entire planet at 60 requests
+          per minute. Below are download links for the data I use in this
+          website. All data files were collected in February 2020. For more
+          information about how to use the data files, consult the{" "}
+          <a href="https://transit.land/documentation/" target="blank">
+            Transitland documentation
+          </a>
+          .
+        </p>
+        <DataDownloadsList />
+        <Header as="h3">
+          <Header.Content>Notice a missing transit feed?</Header.Content>
+        </Header>
+        <p>
+          This website uses data from the{" "}
+          <a href="https://transit.land" target="blank">
+            Transitland database
+          </a>
+          , which combines{" "}
+          <a
+            href="https://en.wikipedia.org/wiki/General_Transit_Feed_Specification"
+            target="blank"
+          >
+            General Transit Feed Specification
+          </a>{" "}
+          (GTFS) feeds into a single database. They have a process for adding a
+          new GTFS feed to their database. Read their documentation{" "}
+          <a
+            href="https://transit.land/documentation/feed-registry/add-a-feed.html"
+            target="blank"
+          >
+            here
+          </a>{" "}
+          for more information.
+        </p>
+
         <Header as="h2">
           <Header.Content>Attribution</Header.Content>
         </Header>
@@ -80,7 +178,7 @@ class AboutPage extends React.Component {
             very messy, but is an attempt at displaying attribution statements
             for all providers who require one.
           </p>
-          <Segment vertical/>
+          <Segment vertical />
           {attributionData ? (
             <div>
               <List>
