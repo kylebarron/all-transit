@@ -177,8 +177,9 @@ class Map extends React.Component {
     }
   };
 
-  onViewStateChange = ({ viewState }) => {
+  onViewStateChange = ({ viewState, oldViewState }) => {
     const { zoom } = viewState;
+    const { oldZoom = zoom } = oldViewState;
     const newState = { zoom: zoom };
     const { accordionActiveIndex } = this.state;
 
@@ -186,7 +187,7 @@ class Map extends React.Component {
     // animating
     if (
       zoom < minScheduleAnimationZoom &&
-      this.state.zoom >= minScheduleAnimationZoom
+      oldZoom >= minScheduleAnimationZoom
     ) {
       if (this._animationFrame) {
         window.cancelAnimationFrame(this._animationFrame);
@@ -197,7 +198,7 @@ class Map extends React.Component {
     // animating
     if (
       zoom >= minScheduleAnimationZoom &&
-      this.state.zoom < minScheduleAnimationZoom
+      oldZoom < minScheduleAnimationZoom
     ) {
       this._animate();
     }
