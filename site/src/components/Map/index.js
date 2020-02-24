@@ -34,6 +34,7 @@ const mapStyle = require("./style.json");
 
 class Map extends React.Component {
   state = {
+    accordionActiveIndex: -1,
     optionsExpanded: false,
     highlightStopsByRoute: false,
     highlightRoutesByStop: false,
@@ -53,13 +54,13 @@ class Map extends React.Component {
     time: 65391
   };
 
-  componentWillUnmount() {
+  componentWillUnmount = () => {
     if (this._animationFrame) {
       window.cancelAnimationFrame(this._animationFrame);
     }
-  }
+  };
 
-  _animate() {
+  _animate = () => {
     const {
       // unit corresponds to the timestamp in source data
       // My trip timestamps are in seconds between 4pm and 8pm => 14400 seconds
@@ -89,10 +90,8 @@ class Map extends React.Component {
     const time =
       ((timestamp % loopSegments) / loopSegments) * loopLength + secondsStart;
     this.setState({ time: time });
-    this._animationFrame = window.requestAnimationFrame(
-      this._animate.bind(this)
-    );
-  }
+    this._animationFrame = window.requestAnimationFrame(this._animate);
+  };
 
   // Called on click by deck.gl
   // event.x, event.y are the clicked x and y coordinates in pixels
@@ -180,6 +179,7 @@ class Map extends React.Component {
   onViewStateChange = ({ viewState }) => {
     const { zoom } = viewState;
     const newState = { zoom: zoom };
+    const { accordionActiveIndex } = this.state;
 
     // If now below minScheduleAnimationZoom and previously above it, stop
     // animating
@@ -202,7 +202,8 @@ class Map extends React.Component {
     }
 
     // Get operators in view
-    this._updateOperators(zoom);
+    // Only update if accordion is open to operators list
+    if (accordionActiveIndex === 1) this._updateOperators(zoom);
 
     // Reset highlighted objects when zooming out past minHighlightZoom
     if (zoom < minHighlightZoom) {
@@ -214,17 +215,18 @@ class Map extends React.Component {
 
   onReactMapGLLoad = () => {
     const zoom = getInitialViewState(this.props.location).zoom || null;
+    const { accordionActiveIndex } = this.state;
 
     // NOTE: this often errors here because while the _map_ has loaded, the
     // operators layer hasn't yet.
-    this._updateOperators(zoom);
+    if (accordionActiveIndex === 1) this._updateOperators(zoom);
 
     if (zoom >= minScheduleAnimationZoom) {
       this._animate();
     }
   };
 
-  _renderDeckLayers() {
+  _renderDeckLayers = () => {
     // Should've named this better, but this is the current dir of json files
     const baseurl =
       "https://data.kylebarron.dev/all-transit/tmpjson/schedule/4_16-20";
@@ -267,7 +269,20 @@ class Map extends React.Component {
         }
       })
     ];
-  }
+  };
+
+  _handleAccordionTitleClick = (e, itemProps) => {
+    const { index } = itemProps;
+    const { accordionActiveIndex } = this.state;
+    const newIndex = accordionActiveIndex === index ? -1 : index;
+
+    if (newIndex == 1) {
+      const { zoom } = this.state;
+      this._updateOperators(zoom);
+    }
+
+    this.setState({ accordionActiveIndex: newIndex });
+  };
 
   render() {
     const { location } = this.props;
@@ -275,7 +290,8 @@ class Map extends React.Component {
       highlightedStopsOnestopIds,
       highlightedRoutesOnestopIds,
       zoom,
-      time
+      time,
+      accordionActiveIndex
     } = this.state;
 
     const optionsPanels = [
@@ -284,7 +300,7 @@ class Map extends React.Component {
         title: "Schedule Animation",
         content: {
           content: (
-            <div style={{ "padding-left": 10, "padding-right": 10 }}>
+            <div style={{ "paddingLeft": 10, "paddingRight": 10 }}>
               {zoom >= minScheduleAnimationZoom ? (
                 <div>
                   <Checkbox
@@ -296,12 +312,12 @@ class Map extends React.Component {
                   />
                   {this.state.enableScheduleAnimation && (
                     <div>
-                  <p>Time: Friday {timeToStr(time)}</p>
-                  <p>
-                    Animation scale is 60x. One second in the animation
-                    represents one minute in real life.
-                  </p>
-                  {zoom < maxScheduleAnimationZoom && (
+                      <p>Time: Friday {timeToStr(time)}</p>
+                      <p>
+                        Animation scale is 60x. One second in the animation
+                        represents one minute in real life.
+                      </p>
+                      {zoom < maxScheduleAnimationZoom && (
                         <p>
                           Animation uses simplified data at this zoom level.
                         </p>
@@ -321,7 +337,7 @@ class Map extends React.Component {
         title: "Operators",
         content: {
           content: (
-            <div style={{ "padding-left": 10, "padding-right": 10 }}>
+            <div style={{ "paddingLeft": 10, "paddingRight": 10 }}>
               {zoom >= minOperatorInfoZoom ? (
                 <OperatorsList
                   operators={this.state.operators}
@@ -351,11 +367,11 @@ class Map extends React.Component {
         title: "Transit Modes",
         content: {
           content: (
-            <div style={{ "padding-left": 10, "padding-right": 10 }}>
+            <div style={{ "paddingLeft": 10, "paddingRight": 10 }}>
               <List>
                 {["Tram", "Metro", "Rail", "Bus", "Ferry", "Cablecar"].map(
                   mode => (
-                    <List.Item>
+                    <List.Item key={mode}>
                       <Checkbox
                         label={`${mode}`}
                         onChange={() => this._toggleState(`include${mode}`)}
@@ -376,9 +392,9 @@ class Map extends React.Component {
           content: (
             <div
               style={{
-                "padding-left": 10,
-                "padding-right": 10,
-                "padding-bottom": 10
+                "paddingLeft": 10,
+                "paddingRight": 10,
+                "paddingBottom": 10
               }}
             >
               {zoom < minHighlightZoom ? (
@@ -501,7 +517,13 @@ class Map extends React.Component {
                   </Link>
                 </Card.Meta>
                 <Card.Description>
-                  <Accordion fluid styled panels={optionsPanels} />
+                  <Accordion
+                    activeIndex={accordionActiveIndex}
+                    fluid
+                    styled
+                    panels={optionsPanels}
+                    onTitleClick={this._handleAccordionTitleClick}
+                  />
                 </Card.Description>
               </Accordion.Content>
             </Card.Content>
