@@ -48,6 +48,14 @@ const dataFiles = [
     desc:
       "Each point along a Route or Route Stop Pattern where passengers may get on or off.",
     size: "100 MB"
+  },
+  {
+    key: "Schedule Stop Pairs",
+    href:
+      "https://data.kylebarron.dev/all-transit/archive/2020_02/ssp_us.json.gz",
+    desc:
+      "Active schedules for the continental U.S. only.",
+    size: "4.8 GB"
   }
 ];
 
