@@ -30,6 +30,8 @@ import {
 // You'll get obscure errors without including the Mapbox GL CSS
 import "../../css/mapbox-gl.css";
 
+const mapStyle = require("./style.json");
+
 class Map extends React.Component {
   state = {
     optionsExpanded: false,
@@ -433,7 +435,7 @@ class Map extends React.Component {
             ref={ref => {
               this.map = ref && ref.getMap();
             }}
-            mapStyle="https://raw.githubusercontent.com/kylebarron/fiord-color-gl-style/master/style.json"
+            mapStyle={mapStyle}
             mapOptions={{ hash: true }}
             onLoad={this.onReactMapGLLoad}
             preventStyleDiffing
