@@ -14,7 +14,8 @@ import {
   Card,
   Grid,
   List,
-  Icon
+  Icon,
+  Header,
 } from "semantic-ui-react";
 import { TransitLayer, interactiveLayerIds } from "./TransitLayer";
 import { OperatorsList } from "./OperatorsList";
@@ -300,7 +301,7 @@ class Map extends React.Component {
         title: "Schedule Animation",
         content: {
           content: (
-            <div style={{ "paddingLeft": 10, "paddingRight": 10 }}>
+            <div style={{ paddingLeft: 10, paddingRight: 10 }}>
               {zoom >= minScheduleAnimationZoom ? (
                 <div>
                   <Checkbox
@@ -337,7 +338,7 @@ class Map extends React.Component {
         title: "Operators",
         content: {
           content: (
-            <div style={{ "paddingLeft": 10, "paddingRight": 10 }}>
+            <div style={{ paddingLeft: 10, paddingRight: 10 }}>
               {zoom >= minOperatorInfoZoom ? (
                 <OperatorsList
                   operators={this.state.operators}
@@ -367,7 +368,7 @@ class Map extends React.Component {
         title: "Transit Modes",
         content: {
           content: (
-            <div style={{ "paddingLeft": 10, "paddingRight": 10 }}>
+            <div style={{ paddingLeft: 10, paddingRight: 10 }}>
               <List>
                 {["Tram", "Metro", "Rail", "Bus", "Ferry", "Cablecar"].map(
                   mode => (
@@ -392,9 +393,9 @@ class Map extends React.Component {
           content: (
             <div
               style={{
-                "paddingLeft": 10,
-                "paddingRight": 10,
-                "paddingBottom": 10
+                paddingLeft: 10,
+                paddingRight: 10,
+                paddingBottom: 10
               }}
             >
               {zoom < minHighlightZoom ? (
@@ -504,7 +505,7 @@ class Map extends React.Component {
                     <Grid.Column width={1}>
                       <Icon name="dropdown" />
                     </Grid.Column>
-                    <Grid.Column width={20}>
+                    <Grid.Column width={8}>
                       <Card.Header textAlign="center">All Transit</Card.Header>
                     </Grid.Column>
                   </Grid.Row>
@@ -512,8 +513,10 @@ class Map extends React.Component {
               </Accordion.Title>
               <Accordion.Content active={this.state.optionsExpanded}>
                 <Card.Meta textAlign="left">
-                  <Link as={Link} to="/about/">
-                    About
+                  <Link to="/about/">
+                    <Header as="h5">
+                      <Header.Content>About</Header.Content>
+                    </Header>
                   </Link>
                 </Card.Meta>
                 <Card.Description>
