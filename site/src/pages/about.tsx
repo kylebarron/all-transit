@@ -23,7 +23,7 @@ const dataFiles = [
     href:
       "https://data.kylebarron.dev/all-transit/archive/2020_02/operators.geojson.gz",
     desc:
-      "A transit agency that offers services to the general public along fixed routes",
+      "A transit agency that offers services to the general public along fixed routes.",
     size: "4 MB"
   },
   {
@@ -31,7 +31,7 @@ const dataFiles = [
     href:
       "https://data.kylebarron.dev/all-transit/archive/2020_02/routes.tar.gz",
     desc:
-      "All information about a single transit service as defined by the transit agency. A Route may have forks and thus may not be a single continuous line.",
+      "All information about a single transit service as defined by the transit agency. A route may have forks and thus may not be a single continuous line.",
     size: "200 MB"
   },
   {
@@ -59,7 +59,7 @@ const DataDownloadsList = () => {
           <List.Icon name="download" size="large" verticalAlign="middle" />
           <List.Content>
             <List.Header as="a" href={item.href} target="blank">
-              {item.key}{' '}({item.size})
+              {item.key} ({item.size})
             </List.Header>
             <List.Description>{item.desc}</List.Description>
           </List.Content>
@@ -104,15 +104,26 @@ class AboutPage extends React.Component {
             <a href="https://kylebarron.dev" target="blank">
               Kyle Barron
             </a>
-          </p>
-          <p>
-            The code to generate this website is{" "}
+            . The code to generate this website is{" "}
             <a href="https://github.com/kylebarron/all-transit" target="blank">
               on Github
             </a>
           </p>
         </Segment>
         <Header as="h3">
+          <Header.Content>Frequently Asked Questions</Header.Content>
+        </Header>
+        <Header as="h4">
+          <Header.Content>
+            Why are some routes long straight lines?
+          </Header.Content>
+        </Header>
+        Some transit data providers don't include the actual geometries that a
+        route travels, and only give the points where a stop occurs. This means
+        that there's no way to reliably guess how the transit vehicle travels
+        between the two points, and so it shows up in the data as a straight
+        line.
+        <Header as="h4">
           <Header.Content>How does it work?</Header.Content>
         </Header>
         <p>
@@ -121,7 +132,6 @@ class AboutPage extends React.Component {
           into more detail about the behind-the-scenes work that makes
           everything work.
         </p>
-
         <Header as="h3">
           <Header.Content>Download the data</Header.Content>
         </Header>
@@ -162,7 +172,6 @@ class AboutPage extends React.Component {
           </a>{" "}
           for more information.
         </p>
-
         <Header as="h2">
           <Header.Content>Attribution</Header.Content>
         </Header>
