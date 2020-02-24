@@ -11,6 +11,7 @@ import {
   Segment,
   Grid
 } from "semantic-ui-react";
+import { Link } from "gatsby";
 import { MenuProps } from "../Menu";
 
 interface HeaderMenuProps extends MenuProps {
@@ -21,7 +22,6 @@ interface HeaderMenuProps extends MenuProps {
 export const HeaderMenu = ({
   items,
   pathname,
-  Link,
   inverted,
   dispatch
 }: HeaderMenuProps) => (
@@ -88,7 +88,10 @@ export const HeaderMenu = ({
           justifyContent: "center"
         }}
       >
-        <Menu.Item header>All Transit</Menu.Item>
+        <Menu.Item header as={Link} to="/">
+          <Icon name="home" size="large" />
+          All Transit
+        </Menu.Item>
       </div>
     </Menu>
   </Container>
