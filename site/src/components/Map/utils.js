@@ -4,10 +4,10 @@ import { navigate } from "gatsby";
 // These are overwritten by the URL hash if it exists
 const initialViewState = {
   bearing: 0,
-  latitude: 38.85,
-  longitude: -98.38,
+  latitude: 30,
+  longitude: -40,
   pitch: 0,
-  zoom: 4
+  zoom: 1.5
 };
 
 // Parse hash from url
