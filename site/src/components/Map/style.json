@@ -24,7 +24,7 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "https://mbtiles.nst.guide/services/openmaptiles/us"
+      "url": "https://mbtiles.nst.guide/services/openmaptiles/planet"
     }
   },
   "sprite": "https://raw.githubusercontent.com/kylebarron/fiord-color-gl-style/master/sprite/fiord-color-gl-style",
