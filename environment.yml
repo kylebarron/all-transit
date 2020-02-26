@@ -1,0 +1,23 @@
+name: all-transit
+channels:
+  - conda-forge
+dependencies:
+  - click
+  - cligj
+  - geojson
+  - geopandas
+  - haversine
+  - jq
+  - mercantile
+  - protobuf
+  - pyproj
+  - shapely
+  - sqlite
+  - tippecanoe
+
+  # Dev dependencies
+  - jupyter
+  - pip
+  - pip:
+    - keplergl_quickvis
+    - python-language-server[all]
