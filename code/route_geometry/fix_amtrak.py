@@ -47,7 +47,7 @@ def main(features, amtrak_shp):
             new_id = feature['id']
             new_feature = geojson.Feature(
                 id=new_id, geometry=new_geom, properties=new_properties)
-            print(new_feature)
+            print(json.dumps(new_feature, separators=(',', ':')))
 
 
 if __name__ == '__main__':
