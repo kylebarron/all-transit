@@ -1,0 +1,196 @@
+[{
+  "shapefile_name": "Acela",
+  "route_onestop_id": "r-dr-acelaexpress"
+},
+{
+  "shapefile_name": "Adirondack",
+  "route_onestop_id": "r-dr-adirondack"
+},
+{
+  "shapefile_name": "Cascades",
+  "route_onestop_id": "r-c2-amtrakcascades"
+},
+{
+  "shapefile_name": "Auto Train",
+  "route_onestop_id": "r-dn-autotrain"
+},
+{
+  "shapefile_name": "Blue Water",
+  "route_onestop_id": "r-dp-bluewater"
+},
+{
+  "shapefile_name": "California Zephyr",
+  "route_onestop_id": "r-9-californiazephyr"
+},
+{
+  "shapefile_name": "Capitol Corridor",
+  "route_onestop_id": "r-9qc-capitolcorridor"
+},
+{
+  "shapefile_name": "Capitol Limited",
+  "route_onestop_id": "r-dp-capitollimited"
+},
+{
+  "shapefile_name": "Cardinal",
+  "route_onestop_id": "r-dn-cardinal"
+},
+{
+  "shapefile_name": "Illinois Zephyr",
+  "route_onestop_id": "r-dp2-carlsandburg"
+},
+{
+  "shapefile_name": "Carolinian/Piedmont",
+  "route_onestop_id": "r-dq-carolinian"
+},
+{
+  "shapefile_name": "City Of New Orleans",
+  "route_onestop_id": "r-dn-cityofneworleans"
+},
+{
+  "shapefile_name": "Coast Starlight",
+  "route_onestop_id": "r-9r-coaststarlight"
+},
+{
+  "shapefile_name": "Crescent",
+  "route_onestop_id": "r-dn-crescent"
+},
+{
+  "shapefile_name": "The Downeaster",
+  "route_onestop_id": "r-drt-downeaster"
+},
+{
+  "shapefile_name": "Empire Builder",
+  "route_onestop_id": "r-c-empirebuilder"
+},
+{
+  "shapefile_name": "Empire Service",
+  "route_onestop_id": "r-dr-empireservice"
+},
+{
+  "shapefile_name": "Ethan Allen Express",
+  "route_onestop_id": "r-dr-ethanallenexpress"
+},
+{
+  "shapefile_name": "Heartland Flyer",
+  "route_onestop_id": "r-9y4-heartlandflyer"
+},
+{
+  "shapefile_name": "Hiawathas",
+  "route_onestop_id": "r-dp9-hiawathaservice"
+},
+{
+  "shapefile_name": "Hoosier State",
+  "route_onestop_id": "r-dp4-hoosierstate"
+},
+{
+  "shapefile_name": "Illini (Illinois_Service)",
+  "route_onestop_id": "r-dp-illini"
+},
+{
+  "shapefile_name": "Illinois Zephyr",
+  "route_onestop_id": "r-dp2-illinoiszephyr"
+},
+{
+  "shapefile_name": "Keystone Service",
+  "route_onestop_id": "r-dr4-keystoneservice"
+},
+{
+  "shapefile_name": "Lake Shore Limited",
+  "route_onestop_id": "r-dr-lakeshorelimited"
+},
+{
+  "shapefile_name": "Chicago - St.Louis",
+  "route_onestop_id": "r-dp0-lincolnservice"
+},
+{
+  "shapefile_name": "Maple Leaf",
+  "route_onestop_id": "r-dr-mapleleaf"
+},
+{
+  "shapefile_name": "Kansas City - St. Louis (Missouri River Runner)",
+  "route_onestop_id": "r-9y-missouririverrunner"
+},
+{
+  "shapefile_name": "Regional",
+  "route_onestop_id": "r-dr-northeastregional"
+},
+{
+  "shapefile_name": "NEC",
+  "route_onestop_id": "r-dr-northeastregional"
+},
+{
+  "shapefile_name": "DC - Newport News",
+  "route_onestop_id": "r-dr-northeastregional"
+},
+{
+  "shapefile_name": "DC - Lynchburg - Roanoke",
+  "route_onestop_id": "r-dr-northeastregional"
+},
+{
+  "shapefile_name": "DC – Richmond",
+  "route_onestop_id": "r-dr-northeastregional"
+},
+{
+  "shapefile_name": "DC - Norfolk",
+  "route_onestop_id": "r-dr-northeastregional"
+},
+{
+  "shapefile_name": "Pacific Surfliner",
+  "route_onestop_id": "r-9q5-pacificsurfliner"
+},
+{
+  "shapefile_name": "Silver_Service/Palmetto",
+  "route_onestop_id": "r-dq-palmetto"
+},
+{
+  "shapefile_name": "Pennsylvanian",
+  "route_onestop_id": "r-dr-pennsylvanian"
+},
+{
+  "shapefile_name": "Pere Marquette",
+  "route_onestop_id": "r-dpd-peremarquette"
+},
+{
+  "shapefile_name": "Carolinian/Piedmont",
+  "route_onestop_id": "r-dnr-piedmont"
+},
+{
+  "shapefile_name": "Illini (Illinois_Service)",
+  "route_onestop_id": "r-dp-saluki"
+},
+{
+  "shapefile_name": "San Joaquins",
+  "route_onestop_id": "r-9q-sanjoaquin"
+},
+{
+  "shapefile_name": "Silver_Service/Palmetto",
+  "route_onestop_id": "r-d-silvermeteor"
+},
+{
+  "shapefile_name": "Silver_Service/Palmetto",
+  "route_onestop_id": "r-d-silverstar"
+},
+{
+  "shapefile_name": "Southwest Chief",
+  "route_onestop_id": "r-9-southwestchief"
+},
+{
+  "shapefile_name": "Sunset Limited",
+  "route_onestop_id": "r-9-sunsetlimited"
+},
+{
+  "shapefile_name": "Texas Eagle",
+  "route_onestop_id": "r-9-texaseagle"
+},
+{
+  "shapefile_name": "Vermonter",
+  "route_onestop_id": "r-dr-vermonter"
+},
+{
+  "shapefile_name": "Wolverines (M-DOT)",
+  "route_onestop_id": "r-dp-wolverine"
+},
+{
+  "shapefile_name": "Wolverines (Michigan_Services)",
+  "route_onestop_id": "r-dp-wolverine"
+}]
