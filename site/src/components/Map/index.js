@@ -28,6 +28,7 @@ import {
   maxScheduleAnimationZoom,
   usBounds
 } from "./constants";
+import DeckWorker from "./deckAttributes.worker.js";
 
 // You'll get obscure errors without including the Mapbox GL CSS
 import "../../css/mapbox-gl.css";
@@ -56,6 +57,16 @@ class Map extends React.Component {
     includeFerry: true,
     includeCablecar: true,
     time: 65391
+  };
+
+  componentDidMount = () => {
+    this.worker = typeof window === "object" && new DeckWorker();
+
+    // if (window.Worker) {
+    //   // this.worker.postMessage(['hello world'])
+    //   this.worker.helloworld('test')
+    //   console.log('message posted to worker')
+    // }
   };
 
   componentWillUnmount = () => {
@@ -229,43 +240,58 @@ class Map extends React.Component {
     const baseurl =
       "https://data.kylebarron.dev/all-transit/tmpjson/schedule/4_16-20";
 
+    // 1206 - 1538 - 12;
     return [
-      new TileLayer({
-        minZoom: minScheduleAnimationZoom,
-        maxZoom: maxScheduleAnimationZoom,
-        visible: this.state.enableScheduleAnimation,
-        getTileData: ({ x, y, z }) =>
-          fetch(`${baseurl}/${z}/${x}/${y}.json`).then(response => {
-            if (response.status === 200) {
-              return response.json();
-            }
-            return [];
+      new TripsLayer({
+        data: () =>
+          fetch(
+            "https://data.kylebarron.dev/all-transit/tmpjson/schedule/4_16-20/12/1206/1538.json"
+          ).then(response => response.json()).then(data => {
+            console.log(data)
+            return data;
           }),
-
-        // this prop is passed on to the TripsLayer that's rendered as a
-        // SubLayer. Otherwise, the TripsLayer can't access the state being
-        // updated.
+        getPath: d => d.map(p => p.slice(0, 2)),
+        getTimestamps: d => d.map(p => p.slice(2)),
+        getColor: [253, 128, 93],
+        getWidth: 3,
+        widthUnits: "pixels",
+        opacity: 0.7,
+        rounded: true,
+        trailLength: 50,
         currentTime: this.state.time,
-
-        renderSubLayers: props => {
-          return new TripsLayer(props, {
-            data: props.data,
-            getPath: d => d.map(p => p.slice(0, 2)),
-            getTimestamps: d => d.map(p => p.slice(2)),
-            getColor: [253, 128, 93],
-            getWidth: 3,
-            widthUnits: "pixels",
-            opacity: 0.7,
-            rounded: true,
-            trailLength: 50,
-            currentTime: props.currentTime,
-            shadowEnabled: false
-            // If you get binary data working in the format Deck.gl expects,then
-            // uncomment this:
-            // _pathType: "open" // this instructs the layer to skip normalization and use the binary as-is
-          });
-        }
+        shadowEnabled: false
       })
+
+      // new TileLayer({
+      //   minZoom: minScheduleAnimationZoom,
+      //   maxZoom: maxScheduleAnimationZoom,
+      //   visible: this.state.enableScheduleAnimation,
+      //   getTileData: data => this.worker.getTileData(data),
+
+      //   // this prop is passed on to the TripsLayer that's rendered as a
+      //   // SubLayer. Otherwise, the TripsLayer can't access the state being
+      //   // updated.
+      //   currentTime: this.state.time,
+
+      //   renderSubLayers: props => {
+      //     return new TripsLayer(props, {
+      //       data: props.data,
+      //       // getPath: d => d.map(p => p.slice(0, 2)),
+      //       // getTimestamps: d => d.map(p => p.slice(2)),
+      //       getColor: [253, 128, 93],
+      //       getWidth: 3,
+      //       widthUnits: "pixels",
+      //       opacity: 0.7,
+      //       rounded: true,
+      //       trailLength: 50,
+      //       currentTime: props.currentTime,
+      //       shadowEnabled: false,
+      //       // If you get binary data working in the format Deck.gl expects,then
+      //       // uncomment this:
+      //       // _pathType: "open" // this instructs the layer to skip normalization and use the binary as-is
+      //     });
+      //   }
+      // })
     ];
   };
 

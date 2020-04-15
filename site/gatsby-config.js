@@ -35,7 +35,7 @@ module.exports = {
         respectDNT: true
       }
     },
-
+    'gatsby-plugin-workerize-loader',
     // Parse all markdown files (each plugin add/parse some data into graphQL layer)
     {
       resolve: `gatsby-transformer-remark`,
